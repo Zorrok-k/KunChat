@@ -2,7 +2,6 @@ package com.Kun.KunChat.service;
 
 import com.Kun.KunChat.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.stereotype.Service;
 
 /**
 * @author Kun
