@@ -1,7 +1,5 @@
-package com.Kun.KunChat.controller;
+package com.Kun.KunChat.common;
 
-
-import com.Kun.KunChat.common.ResponseGlobal;
 
 /**
  * Author: Beta
@@ -15,7 +13,7 @@ public class BaseController {
 
     /**
      * 成功 200
-     *
+     * <p>
      * 一般错误 500
      */
     private final ResponseGlobal<Object> responseGlobal = new ResponseGlobal<>();
@@ -35,16 +33,9 @@ public class BaseController {
     }
 
     // 失败需要编写错误内容
-    protected ResponseGlobal<Object> getFailedResponse(String msg) {
-        responseGlobal.setCode(500);
+    protected ResponseGlobal<Object> getFailedResponse(Integer code, String msg) {
+        responseGlobal.setCode(code);
         responseGlobal.setMsg(msg);
-        responseGlobal.setData(null);
-        return responseGlobal;
-    }
-
-    protected ResponseGlobal<Object> getFailedResponse() {
-        responseGlobal.setCode(500);
-        responseGlobal.setMsg("failed");
         responseGlobal.setData(null);
         return responseGlobal;
     }
