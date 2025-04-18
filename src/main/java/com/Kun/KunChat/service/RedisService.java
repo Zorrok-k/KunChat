@@ -13,7 +13,7 @@ import java.util.Map;
 
 public interface RedisService {
 
-    public void putString(String key, String value);
+    public void putString(String key, String value,int time);
 
     public void putHash(String key, Map<String, Object> value);
 
@@ -26,8 +26,6 @@ public interface RedisService {
     public void deleteHash(String key);
 
     public boolean hasHash(String key);
-
-    public void setTime(String key,int time);
 
 
     // public List<String> getAllHashKeys(String pattern);

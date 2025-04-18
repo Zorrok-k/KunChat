@@ -3,6 +3,7 @@ package com.Kun.KunChat.controller;
 import com.Kun.KunChat.common.ResponseGlobal;
 import com.Kun.KunChat.service.RedisService;
 import com.wf.captcha.ArithmeticCaptcha;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,8 +37,7 @@ public class AccountController extends BaseController{
         String code = captcha.text();
         String codeBase64 = captcha.toBase64();
         // 验证码存入Redis
-        redisService.putString("KunChat_CheckCode:",code);
-        redisService.setTime("KunChat_CheckCode:",60*5);
+        redisService.putString("KunChat_CheckCode:",code,60*5);
         // 设置当前验证码唯一标识
         String codeSign = UUID.randomUUID().toString();
         // 存入容器
