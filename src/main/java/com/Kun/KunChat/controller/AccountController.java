@@ -1,11 +1,13 @@
 package com.Kun.KunChat.controller;
 
+import com.Kun.KunChat.common.BaseController;
+import com.Kun.KunChat.common.BusinessException;
 import com.Kun.KunChat.common.ResponseGlobal;
 import com.Kun.KunChat.service.RedisService;
 import com.wf.captcha.ArithmeticCaptcha;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +26,7 @@ import java.util.UUID;
 @RestController("accountController")
 @RequestMapping("/account")
 @Validated
-public class AccountController extends BaseController{
+public class AccountController extends BaseController {
 
     @Autowired
     private RedisService redisService;
@@ -47,5 +49,12 @@ public class AccountController extends BaseController{
         return getSuccessResponse(data);
     }
 
+    // 测试异常处理
+    @RequestMapping("/test")
+    public ResponseGlobal<Object> getException(int id, String name){
+        boolean equals = name.equals("id");
+        System.out.println("id: " + id + ", name: " + name);
+        return getSuccessResponse(equals);
+    }
 
 }
