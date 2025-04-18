@@ -35,6 +35,11 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public void deleteString(String key) {
+        redisTemplate.delete(key);
+    }
+
+    @Override
     public void putHash(String key, Map<String, Object> value) {
         hashOperations.putAll(key, value);
     }
@@ -60,7 +65,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public boolean hasHash(String key) {
+    public boolean hasData(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
