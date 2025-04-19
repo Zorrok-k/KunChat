@@ -22,6 +22,9 @@ public enum Status {
 
     SUCCEED(1000, "succeed"),
     ERROR_NULLPOINTER(1400,"空指针异常！"),
+    ERROR_CHECKCODELOSE(1510,"验证码失效！请重新获取。"),
+    ERROR_CHECKCODEWRONG(1511,"验证码错误！请重新输入。"),
+    ERROR_EMAILEXITS(1520,"邮箱已存在！"),
     ERROR_BUSINESS(1500,"业务异常！"),
     FAILED(2000,"服务器异常！请稍后尝试。");
 
