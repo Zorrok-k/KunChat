@@ -3,8 +3,13 @@ package com.Kun.KunChat.controller;
 import com.Kun.KunChat.common.BaseController;
 import com.Kun.KunChat.common.BusinessException;
 import com.Kun.KunChat.common.ResponseGlobal;
+import com.Kun.KunChat.common.Status;
+import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
+import com.Kun.KunChat.service.UserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,30 +36,86 @@ public class AccountController extends BaseController {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private UserInfoService userInfoService;
+
     @RequestMapping("/checkCode")
     public ResponseGlobal<Object> checkCode() {
         // 图形验证码
-        ArithmeticCaptcha captcha = new ArithmeticCaptcha(100,42);
+        ArithmeticCaptcha captcha = new ArithmeticCaptcha(100, 42);
         // 生成验证码和图片
         String code = captcha.text();
         String codeBase64 = captcha.toBase64();
-        // 验证码存入Redis
-        redisService.putString("KunChat_CheckCode:",code,60*5);
         // 设置当前验证码唯一标识
         String codeSign = UUID.randomUUID().toString();
+        // 验证码存入Redis
+        redisService.putString("KunChat_CodeSign:" + codeSign, code, 60 * 5);
         // 存入容器
-        Map<String,String> data = new HashMap<>();
-        data.put("codeSign",codeSign);
-        data.put("codeBase64",codeBase64);
+        Map<String, String> data = new HashMap<>();
+        data.put("codeSign", codeSign);
+        data.put("codeBase64", codeBase64);
         return getSuccessResponse(data);
+    }
+
+    // 查询邮箱是否存在
+    @RequestMapping("/checkEmail")
+    public ResponseGlobal<Object> checkEmail(@NotEmpty @Email String email) {
+        try {
+            if (userInfoService.checkEmail(email) != null) {
+                throw new BusinessException(Status.ERROR_EMAILEXITS);
+            }
+        } finally {
+
+        }
+        return getSuccessResponse();
+    }
+
+    @PostMapping("/register")
+    public ResponseGlobal<Object> userRegister(@NotEmpty String nikeName,
+                                               @NotEmpty @Email String email,
+                                               @NotEmpty String password,
+                                               @NotEmpty String code,
+                                               @NotEmpty String codeSign) {
+        // 这样写验证码尝试机会只有一次，不过重新获取一个也很快
+        try {
+            if (redisService.hasKey("KunChat_CodeSign:" + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getString("KunChat_CodeSign:" + codeSign))) {
+                    throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
+                }
+                if (userInfoService.checkEmail(email) != null) {
+                    throw new BusinessException(Status.ERROR_EMAILEXITS);
+                }
+                UserInfo user = userInfoService.addUser(nikeName,email,password);
+                if (user == null){
+                    throw new BusinessException(Status.FAILED);
+                }
+                return getSuccessResponse(user);
+            } else {
+                throw new BusinessException(Status.ERROR_CHECKCODELOSE);
+            }
+
+        } finally {
+            redisService.deleteString("KunChat_CodeSign:" + codeSign);
+        }
     }
 
     // 测试异常处理
     @RequestMapping("/test")
-    public ResponseGlobal<Object> getException(int id, String name){
-        boolean equals = name.equals("id");
-        System.out.println("id: " + id + ", name: " + name);
-        return getSuccessResponse(equals);
+    public ResponseGlobal<Object> getException(@NotEmpty String code,
+                                               @NotEmpty String codeSign) {
+        try {
+            if (redisService.hasKey("KunChat_CodeSign:" + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getString("KunChat_CodeSign:" + codeSign))) {
+                    throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
+                }
+                return getSuccessResponse();
+            } else {
+                throw new BusinessException(Status.ERROR_CHECKCODELOSE);
+            }
+
+        } finally {
+            redisService.deleteString("KunChat_CodeSign:" + codeSign);
+        }
     }
 
 }
