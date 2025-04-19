@@ -29,9 +29,14 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public void putString(String key, String value,int time) {
-        redisTemplate.opsForValue().set(key,value);
+    public void putString(String key, String value, int time) {
+        redisTemplate.opsForValue().set(key, value);
         redisTemplate.expire(key, time, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public String getString(String key) {
+        return (String) redisTemplate.opsForValue().get(key);
     }
 
     @Override
@@ -65,7 +70,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public boolean hasData(String key) {
+    public boolean hasKey(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
