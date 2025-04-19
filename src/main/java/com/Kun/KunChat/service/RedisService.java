@@ -15,6 +15,8 @@ public interface RedisService {
 
     public void putString(String key, String value,int time);
 
+    public String getString(String key);
+
     public void deleteString(String key);
 
     public void putHash(String key, Map<String, Object> value);
@@ -27,7 +29,7 @@ public interface RedisService {
 
     public void deleteHash(String key);
 
-    public boolean hasData(String key);
+    public boolean hasKey(String key);
 
 
     // public List<String> getAllHashKeys(String pattern);
