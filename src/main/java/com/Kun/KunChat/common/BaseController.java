@@ -18,6 +18,7 @@ public class BaseController {
      */
     private final ResponseGlobal<Object> responseGlobal = new ResponseGlobal<>();
 
+    // 无数据返回成功
     protected ResponseGlobal<Object> getSuccessResponse() {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
@@ -25,6 +26,7 @@ public class BaseController {
         return responseGlobal;
     }
 
+    // 带数据返回成功
     protected ResponseGlobal<Object> getSuccessResponse(Object data) {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
@@ -32,7 +34,7 @@ public class BaseController {
         return responseGlobal;
     }
 
-    //抛出业务异常时手动编写错误内容
+    // 抛出业务异常时
     protected ResponseGlobal<Object> getFailedResponse(Integer code, String msg) {
         responseGlobal.setCode(code);
         responseGlobal.setMsg(msg);
