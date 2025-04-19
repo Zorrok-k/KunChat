@@ -18,24 +18,31 @@ public class BaseController {
      */
     private final ResponseGlobal<Object> responseGlobal = new ResponseGlobal<>();
 
-    protected ResponseGlobal<Object> getSuccessResponse(Object data) {
-        responseGlobal.setCode(200);
-        responseGlobal.setMsg("succeed");
-        responseGlobal.setData(data);
-        return responseGlobal;
-    }
-
     protected ResponseGlobal<Object> getSuccessResponse() {
-        responseGlobal.setCode(200);
-        responseGlobal.setMsg("succeed");
+        responseGlobal.setCode(Status.SUCCEED.getCode());
+        responseGlobal.setMsg(Status.SUCCEED.getMessage());
         responseGlobal.setData(null);
         return responseGlobal;
     }
 
-    // 失败需要编写错误内容
+    protected ResponseGlobal<Object> getSuccessResponse(Object data) {
+        responseGlobal.setCode(Status.SUCCEED.getCode());
+        responseGlobal.setMsg(Status.SUCCEED.getMessage());
+        responseGlobal.setData(data);
+        return responseGlobal;
+    }
+
+    //抛出业务异常时手动编写错误内容
     protected ResponseGlobal<Object> getFailedResponse(Integer code, String msg) {
         responseGlobal.setCode(code);
         responseGlobal.setMsg(msg);
+        responseGlobal.setData(null);
+        return responseGlobal;
+    }
+
+    protected ResponseGlobal<Object> getFailedResponse(Status status) {
+        responseGlobal.setCode(status.getCode());
+        responseGlobal.setMsg(status.getMessage());
         responseGlobal.setData(null);
         return responseGlobal;
     }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionGlobal extends BaseController {
 
-    // 处理业务异常 代码和原因都是自定义的 犹豫不知道怎么设计，干脆 1000~2000
+    // 处理业务异常 代码规范在Status枚举类
     @ExceptionHandler(value = BusinessException.class)
     public ResponseGlobal<Object> businessException(BusinessException e) {
         log.error("\n\n业务异常({}) => 原因: {}\n", e.getCode(), e.getMessage());
@@ -26,15 +26,15 @@ public class ExceptionGlobal extends BaseController {
     // 处理空指针异常
     @ExceptionHandler(value = {NullPointerException.class})
     public ResponseGlobal<Object> globalException(NullPointerException e) {
-        log.error("\n\n空指针异常({}) => 原因: {}\n", 1400, e.getMessage());
-        return getFailedResponse(2000, "空指针异常！请检查传参。");
+        log.error("\n\n空指针异常({}) => 原因: {}\n", Status.ERROR_NULLPOINTER.getCode(), e.getMessage());
+        return getFailedResponse(Status.ERROR_NULLPOINTER);
     }
 
     // 处理未知异常
     @ExceptionHandler(value = Exception.class)
     public ResponseGlobal<Object> globalException(Exception e) {
-        log.error("\n\n未知异常({}) => 原因: {}\n",2000, e.getMessage());
-        return getFailedResponse(2000, "服务器异常！请稍后尝试。");
+        log.error("\n\n未知异常({}) => 原因: {}\n", Status.FAILED.getCode(), e.getMessage());
+        return getFailedResponse(Status.FAILED);
     }
 
 }

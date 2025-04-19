@@ -13,16 +13,19 @@ import lombok.NoArgsConstructor;
  * Description:
  **/
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class BusinessException extends RuntimeException{
+public class BusinessException extends RuntimeException {
 
     /**
      * 自定义业务异常代码
      */
 
-    private Integer code;
+    private final Integer code;
 
-    private String message;
+    private final String message;
+
+    public BusinessException(Status status) {
+        this.code = status.getCode();
+        this.message = status.getMessage();
+    }
 
 }
