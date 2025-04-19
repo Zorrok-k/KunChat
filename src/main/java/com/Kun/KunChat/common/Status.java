@@ -1,0 +1,39 @@
+package com.Kun.KunChat.common;
+
+import lombok.Getter;
+import lombok.ToString;
+
+/**
+ * Author: Beta
+ * Date: 2025/4/19 12:06
+ * Param:
+ * Return:
+ * Description: 写一些状态码
+ **/
+
+@ToString
+@Getter
+public enum Status {
+
+    /**
+     * 1000 大成功
+     * 2000 大失败
+     */
+
+    SUCCEED(1000, "succeed"),
+    ERROR_NULLPOINTER(1400,"空指针异常！"),
+    ERROR_BUSINESS(1500,"业务异常！"),
+    FAILED(2000,"服务器异常！请稍后尝试。");
+
+    private Integer code;
+    private String message;
+
+    // 私有化构造器
+    Status() {}
+
+    Status(Integer code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+}
