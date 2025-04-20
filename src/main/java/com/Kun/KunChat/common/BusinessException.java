@@ -6,7 +6,7 @@ import lombok.Getter;
  * Date: 2025/4/18 15:57
  * Param:
  * Return:
- * Description:
+ * Description: 业务异常状态类
  **/
 @Getter
 public class BusinessException extends RuntimeException {
