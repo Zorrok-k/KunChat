@@ -1,5 +1,6 @@
 package com.Kun.KunChat.service.impl;
 
+import com.Kun.KunChat.service.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.Kun.KunChat.entity.UserInfo;
@@ -7,7 +8,9 @@ import com.Kun.KunChat.service.UserInfoService;
 import com.Kun.KunChat.mapper.UserInfoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -25,6 +28,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Autowired
     private UserInfoMapper userInfoMapper;
+
+    @Autowired
+    private RedisService redisService;
+
+    @Transactional
+    public UserInfo loginUpdata(String id) {
+        UserInfo userInfo = new UserInfo();
+        // 生成当前时间
+        LocalDateTime timeNow = LocalDateTime.now();
+        userInfo.setUserId(id);
+        userInfo.setLastLoginTime(timeNow);
+        userInfoMapper.updateById(userInfo);
+        userInfo = userInfoMapper.selectById(id);
+        redisService.setValue("UserInfo::" + id, userInfo);
+        return userInfo;
+    }
 
     @Override
     public UserInfo checkEmail(String email) {
@@ -53,9 +72,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return userInfoMapper.selectById(user.getUserId());
     }
 
+    @Cacheable(value = "UserInfo", key = "#id", cacheManager = "CacheManager_User")
     @Override
     public UserInfo getUserById(String id) {
-        return userInfoMapper.selectById(id);
+        UserInfo user = userInfoMapper.selectById(id);
+        user.setPassword("******");
+        return user;
+    }
+
+    @Override
+    public UserInfo login(String email, String password) {
+        UserInfo user = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("email", email));
+        if (user.getPassword().equals(password)) {
+            return loginUpdata(user.getUserId());
+        }
+        return null;
     }
 
 }

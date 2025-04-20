@@ -17,4 +17,6 @@ public interface UserInfoService extends IService<UserInfo> {
 
  UserInfo getUserById(String id);
 
+ UserInfo login(String email,String password);
+
 }

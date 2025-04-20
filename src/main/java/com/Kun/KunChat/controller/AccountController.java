@@ -1,19 +1,19 @@
 package com.Kun.KunChat.controller;
 
-import com.Kun.KunChat.common.BaseController;
-import com.Kun.KunChat.common.BusinessException;
-import com.Kun.KunChat.common.ResponseGlobal;
-import com.Kun.KunChat.common.Status;
+import com.Kun.KunChat.common.*;
 import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
 import com.Kun.KunChat.service.UserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,11 +34,15 @@ import java.util.UUID;
 @Validated
 public class AccountController extends BaseController {
 
+    private static final Logger log = LoggerFactory.getLogger(AccountController.class);
     @Autowired
     private RedisService redisService;
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private TokenUtils tokenUtils;
 
     @RequestMapping("/checkCode")
     public ResponseGlobal<Object> checkCode() {
@@ -50,7 +54,7 @@ public class AccountController extends BaseController {
         // 设置当前验证码唯一标识
         String codeSign = UUID.randomUUID().toString();
         // 验证码存入Redis
-        redisService.putString("CodeSign:" + codeSign, code, 60 * 5);
+        redisService.setValue(RedisKeys.CODESIGN.getKey() + codeSign, code, 60 * 5);
         // 存入容器
         Map<String, String> data = new HashMap<>();
         data.put("codeSign", codeSign);
@@ -72,15 +76,11 @@ public class AccountController extends BaseController {
     }
 
     @PostMapping("/register")
-    public ResponseGlobal<Object> userRegister(@NotEmpty String nikeName,
-                                               @NotEmpty @Email String email,
-                                               @NotEmpty String password,
-                                               @NotEmpty String code,
-                                               @NotEmpty String codeSign) {
+    public ResponseGlobal<Object> userRegister(@NotEmpty String nikeName, @NotEmpty @Email String email, @NotEmpty String password, @NotEmpty String code, @NotEmpty String codeSign) {
         // 这样写验证码尝试机会只有一次，不过重新获取一个也很快
         try {
-            if (redisService.hasKey("CodeSign:" + codeSign)) {
-                if (!code.equalsIgnoreCase(redisService.getString("CodeSign:" + codeSign))) {
+            if (redisService.hasKey(RedisKeys.CODESIGN.getKey() + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getValue(RedisKeys.CODESIGN.getKey() + codeSign).toString())) {
                     throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
                 }
                 if (userInfoService.checkEmail(email) != null) {
@@ -96,16 +96,49 @@ public class AccountController extends BaseController {
             }
 
         } finally {
-            redisService.deleteString("CodeSign:" + codeSign);
+            redisService.deleteString(RedisKeys.CODESIGN.getKey() + codeSign);
+        }
+    }
+
+    @RequestMapping("/login")
+    public ResponseGlobal<Object> userLogin(@NotEmpty @Email String email, @NotEmpty String password) {
+        try {
+            UserInfo userInfo = userInfoService.login(email, password);
+            if (userInfo == null) {
+                throw new BusinessException(Status.ERROR_LOGIN);
+            }
+            // 生成在Redis中的唯一登录ID
+            String loginId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+            // 用这个ID加密成Token，传回来解密才能找到是否登录
+            String token = tokenUtils.createToken(loginId);
+            redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
+            return getSuccessResponse(token);
+        } finally {
+
+        }
+    }
+
+    @RequestMapping("/loginVerify")
+    public ResponseGlobal<Object> loginVerify(@RequestHeader String token) {
+        try {
+            String loginId = tokenUtils.parseToken(token);
+            if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
+                throw new BusinessException(Status.ERROR_LOGINLOSE);
+            }
+            String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+            UserInfo userInfo = userInfoService.getUserById(userId);
+            return getSuccessResponse(userInfo);
+        } finally {
+
         }
     }
 
     // 测试自动注解
-    @Cacheable(value = "{Test}", keyGenerator = "KeyGenerator", cacheManager = "CacheManager_User" )
+    @Cacheable(value = "{Test}", keyGenerator = "KeyGenerator", cacheManager = "CacheManager_User")
     @RequestMapping("/test")
     public ResponseGlobal<Object> autoCache(@NotEmpty String id) {
         try {
-            return getSuccessResponse(userInfoService.getUserById(id));
+            return getSuccessResponse(userInfoService.getById(id));
         } finally {
 
         }
