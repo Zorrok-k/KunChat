@@ -21,6 +21,7 @@ public enum Status {
      */
 
     SUCCEED(1000, "succeed"),
+    ERROR_VALIDATED(1100, "参数不合法！"),
     ERROR_NULLPOINTER(1400,"空指针异常！"),
     ERROR_CHECKCODELOSE(1510,"验证码失效！请重新获取。"),
     ERROR_CHECKCODEWRONG(1511,"验证码错误！请重新输入。"),

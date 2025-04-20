@@ -1,6 +1,7 @@
 package com.Kun.KunChat.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -23,8 +24,15 @@ public class ExceptionGlobal extends BaseController {
         return getFailedResponse(e.getCode(), e.getMessage());
     }
 
+    // 处理 @Validated 校验异常
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public ResponseGlobal<Object> globalException(MethodArgumentNotValidException e) {
+        log.error("\n\n参数不合法({}) => 原因: {}\n", Status.ERROR_VALIDATED.getCode(), e.getMessage());
+        return getFailedResponse(Status.ERROR_VALIDATED);
+    }
+
     // 处理空指针异常
-    @ExceptionHandler(value = {NullPointerException.class})
+    @ExceptionHandler(value = NullPointerException.class)
     public ResponseGlobal<Object> globalException(NullPointerException e) {
         log.error("\n\n空指针异常({}) => 原因: {}\n", Status.ERROR_NULLPOINTER.getCode(), e.getMessage());
         return getFailedResponse(Status.ERROR_NULLPOINTER);
