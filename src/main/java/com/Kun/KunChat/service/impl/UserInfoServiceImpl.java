@@ -53,6 +53,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return userInfoMapper.selectById(user.getUserId());
     }
 
+    @Override
+    public UserInfo getUserById(String id) {
+        return userInfoMapper.selectById(id);
+    }
+
 }
 
 

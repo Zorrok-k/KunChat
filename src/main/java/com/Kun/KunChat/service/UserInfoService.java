@@ -15,4 +15,6 @@ public interface UserInfoService extends IService<UserInfo> {
 
  UserInfo addUser(String nikeName,String email,String password);
 
+ UserInfo getUserById(String id);
+
 }
