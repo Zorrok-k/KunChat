@@ -49,7 +49,7 @@ public class AccountController extends BaseController {
         // 设置当前验证码唯一标识
         String codeSign = UUID.randomUUID().toString();
         // 验证码存入Redis
-        redisService.putString("KunChat_CodeSign:" + codeSign, code, 60 * 5);
+        redisService.putString("CodeSign:" + codeSign, code, 60 * 5);
         // 存入容器
         Map<String, String> data = new HashMap<>();
         data.put("codeSign", codeSign);
@@ -78,8 +78,8 @@ public class AccountController extends BaseController {
                                                @NotEmpty String codeSign) {
         // 这样写验证码尝试机会只有一次，不过重新获取一个也很快
         try {
-            if (redisService.hasKey("KunChat_CodeSign:" + codeSign)) {
-                if (!code.equalsIgnoreCase(redisService.getString("KunChat_CodeSign:" + codeSign))) {
+            if (redisService.hasKey("CodeSign:" + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getString("CodeSign:" + codeSign))) {
                     throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
                 }
                 if (userInfoService.checkEmail(email) != null) {
@@ -95,7 +95,7 @@ public class AccountController extends BaseController {
             }
 
         } finally {
-            redisService.deleteString("KunChat_CodeSign:" + codeSign);
+            redisService.deleteString("CodeSign:" + codeSign);
         }
     }
 
@@ -104,8 +104,8 @@ public class AccountController extends BaseController {
     public ResponseGlobal<Object> getException(@NotEmpty String code,
                                                @NotEmpty String codeSign) {
         try {
-            if (redisService.hasKey("KunChat_CodeSign:" + codeSign)) {
-                if (!code.equalsIgnoreCase(redisService.getString("KunChat_CodeSign:" + codeSign))) {
+            if (redisService.hasKey("CodeSign:" + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getString("CodeSign:" + codeSign))) {
                     throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
                 }
                 return getSuccessResponse();
@@ -114,7 +114,7 @@ public class AccountController extends BaseController {
             }
 
         } finally {
-            redisService.deleteString("KunChat_CodeSign:" + codeSign);
+            redisService.deleteString("CodeSign:" + codeSign);
         }
     }
 
