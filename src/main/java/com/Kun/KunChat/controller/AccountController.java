@@ -11,6 +11,7 @@ import com.wf.captcha.ArithmeticCaptcha;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,8 +86,8 @@ public class AccountController extends BaseController {
                 if (userInfoService.checkEmail(email) != null) {
                     throw new BusinessException(Status.ERROR_EMAILEXITS);
                 }
-                UserInfo user = userInfoService.addUser(nikeName,email,password);
-                if (user == null){
+                UserInfo user = userInfoService.addUser(nikeName, email, password);
+                if (user == null) {
                     throw new BusinessException(Status.FAILED);
                 }
                 return getSuccessResponse(user);
@@ -99,22 +100,14 @@ public class AccountController extends BaseController {
         }
     }
 
-    // 测试异常处理
+    // 测试自动注解
+    @Cacheable(value = "{Test}", keyGenerator = "KeyGenerator", cacheManager = "CacheManager_User" )
     @RequestMapping("/test")
-    public ResponseGlobal<Object> getException(@NotEmpty String code,
-                                               @NotEmpty String codeSign) {
+    public ResponseGlobal<Object> autoCache(@NotEmpty String id) {
         try {
-            if (redisService.hasKey("CodeSign:" + codeSign)) {
-                if (!code.equalsIgnoreCase(redisService.getString("CodeSign:" + codeSign))) {
-                    throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
-                }
-                return getSuccessResponse();
-            } else {
-                throw new BusinessException(Status.ERROR_CHECKCODELOSE);
-            }
-
+            return getSuccessResponse(userInfoService.getUserById(id));
         } finally {
-            redisService.deleteString("CodeSign:" + codeSign);
+
         }
     }
 
