@@ -13,9 +13,11 @@ import java.util.Map;
 
 public interface RedisService {
 
-    public void putString(String key, String value,int time);
+    public void setValue(String key, Object value, int time);
 
-    public String getString(String key);
+    public void setValue(String key, Object value);
+
+    public Object getValue(String key);
 
     public void deleteString(String key);
 

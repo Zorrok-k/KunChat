@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -29,14 +30,18 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public void putString(String key, String value, int time) {
-        redisTemplate.opsForValue().set(key, value);
-        redisTemplate.expire(key, time, TimeUnit.SECONDS);
+    public void setValue(String key, Object value, int time) {
+        redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
     }
 
     @Override
-    public String getString(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+    public void setValue(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
+
+    @Override
+    public Object getValue(String key) {
+        return redisTemplate.opsForValue().get(key);
     }
 
     @Override
