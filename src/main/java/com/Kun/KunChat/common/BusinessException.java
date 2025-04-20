@@ -1,10 +1,6 @@
 package com.Kun.KunChat.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 /**
  * Author: Beta
  * Date: 2025/4/18 15:57
