@@ -1,5 +1,6 @@
 package com.Kun.KunChat.redis;
 
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -7,6 +8,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
 
 /**
  * Author: Beta
@@ -19,7 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Bean
+    @Bean("RedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
@@ -38,9 +40,30 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    @Bean
+    @Bean("HashOperations")
     public HashOperations<String, String, Object> hashOperations(RedisTemplate<String, Object> redisTemplate) {
         return redisTemplate.opsForHash();
     }
 
+    @Bean("KeyGenerator")
+    public KeyGenerator keyGenerator() {
+        return (target, method, params) -> {
+            StringBuilder sb = new StringBuilder();
+            // 类名
+            String className = target.getClass().getName() + ":";
+            // 方法名
+            String methodName = method.getName() + ":";
+            // 字符拼接
+            sb.append("RedisAutoCache:");
+            sb.append(className);
+            sb.append(methodName);
+            // 请求参数的拼接
+            for (Object obj : params) {
+                sb.append(obj.toString());
+                sb.append("&");
+            }
+            return sb.toString();
+        };
+
+    }
 }
