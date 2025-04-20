@@ -1,6 +1,7 @@
 package com.Kun.KunChat.config;
 
 import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
+import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -9,6 +10,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -36,6 +38,7 @@ public class RedisConfig {
 
     // 使用 Jackson2JsonRedisSerializer 来序列化和反序列化对象
     private final FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+    private final GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
 
     // String 序列化
     private final StringRedisSerializer serializer = new StringRedisSerializer();
@@ -54,7 +57,7 @@ public class RedisConfig {
 
         // 设置 key 和 value 的序列化方式
         redisTemplate.setKeySerializer(serializer); // key 使用 String 序列化
-        redisTemplate.setValueSerializer(fastJsonRedisSerializer); // value 使用 Jackson2Json 序列化
+        redisTemplate.setValueSerializer(fastJsonRedisSerializer);
 
         // 设置 hash 的 key 和 value 序列化方式
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
@@ -68,11 +71,12 @@ public class RedisConfig {
         return redisTemplate.opsForHash();
     }
 
+    @Primary
     @Bean("CacheManager_Nomal")
     public CacheManager cacheManager1(RedisConnectionFactory redisConnectionFactory) {
 
         // 配置自动缓存的序列化
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(fastJsonRedisSerializer)).disableCachingNullValues();
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericFastJsonRedisSerializer)).disableCachingNullValues();
 
         return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config).build();
     }
@@ -82,7 +86,7 @@ public class RedisConfig {
     public CacheManager cacheManager2(RedisConnectionFactory redisConnectionFactory) {
 
         // 配置自动缓存的序列化
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(fastJsonRedisSerializer)).disableCachingNullValues();
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofDays(7)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericFastJsonRedisSerializer)).disableCachingNullValues();
 
         return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config).build();
     }
