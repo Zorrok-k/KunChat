@@ -1,4 +1,4 @@
-package com.Kun.KunChat.redis;
+package com.Kun.KunChat.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.KeyGenerator;
