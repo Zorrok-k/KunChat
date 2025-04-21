@@ -133,12 +133,11 @@ public class AccountController extends BaseController {
         }
     }
 
-    // 测试自动注解
-    @Cacheable(value = "{Test}", keyGenerator = "KeyGenerator", cacheManager = "CacheManager_User")
+    // 查询一个用户
     @RequestMapping("/test")
-    public ResponseGlobal<Object> autoCache(@NotEmpty String id) {
+    public ResponseGlobal<Object> getById(@NotEmpty String id) {
         try {
-            return getSuccessResponse(userInfoService.getById(id));
+            return getSuccessResponse(userInfoService.getUserById(id));
         } finally {
 
         }
