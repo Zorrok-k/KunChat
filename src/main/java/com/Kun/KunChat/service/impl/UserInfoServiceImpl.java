@@ -42,6 +42,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     }
 
     @Override
+    public UserInfo checkUserId(String userId) {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        return userInfoMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public UserInfo addUser(String nikeName, String email, String password) {
         UserInfo user = new UserInfo();
         user.setUserId(UUID.randomUUID().toString().replace("-", "").substring(0, 16));
@@ -62,7 +69,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Cacheable(value = "UserInfo", key = "#id", cacheManager = "CacheManager_User")
     @Override
     public UserInfo getUserById(String id) {
-        log.info("缓存未命中id:{}，执行查询", id);
+        log.info("缓存未命中id: {}，执行查询", id);
         UserInfo user = userInfoMapper.selectById(id);
         user.setPassword("******");
         return user;
@@ -107,13 +114,19 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfoMapper.updateById(user);
     }
 
+    @Transactional
     @Override
     public UserInfo updateUser(UserInfo user) {
         if (user.getUserId() == null) {
             return null;
         }
         userInfoMapper.updateById(user);
-        return userInfoMapper.selectById(user.getUserId());
+        user = userInfoMapper.selectById(user.getUserId());
+        // 同时更新缓存数据，如果有
+        if (redisService.hasKey("UserInfo::" + user.getUserId())) {
+            redisService.setValue("UserInfo::" + user.getUserId(), user);
+        }
+        return user;
     }
 
 }
