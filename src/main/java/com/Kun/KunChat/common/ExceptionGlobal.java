@@ -1,6 +1,8 @@
 package com.Kun.KunChat.common;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,7 +29,21 @@ public class ExceptionGlobal extends BaseController {
     // 处理 @Validated 校验异常
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseGlobal<Object> globalException(MethodArgumentNotValidException e) {
-        log.error("\n\n参数不合法({}) => 原因: {}\n", Status.ERROR_VALIDATED.getCode(), e.getMessage());
+        log.error("\n\n参数不合法({}) => 原因:{} {}\n", Status.ERROR_VALIDATED.getCode(), e.getFieldError().getField(), e.getFieldError().getDefaultMessage());
+        return getFailedResponse(Status.ERROR_VALIDATED);
+    }
+
+    // 处理 @Validated 校验异常
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public ResponseGlobal<Object> globalException(ConstraintViolationException e) {
+        log.error("\n\n参数不合法({}) => 原因:{}\n", Status.ERROR_VALIDATED.getCode(), e.getMessage());
+        return getFailedResponse(Status.ERROR_VALIDATED);
+    }
+
+    // 处理 @Validated 校验异常
+    @ExceptionHandler(value = BindException.class)
+    public ResponseGlobal<Object> globalException(BindException e) {
+        log.error("\n\n参数不合法({}) => 原因:{} {}\n", Status.ERROR_VALIDATED.getCode(), e.getFieldError().getField(), e.getFieldError().getDefaultMessage());
         return getFailedResponse(Status.ERROR_VALIDATED);
     }
 
