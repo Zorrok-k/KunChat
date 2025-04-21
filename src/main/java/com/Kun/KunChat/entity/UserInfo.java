@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 /**
@@ -16,34 +17,44 @@ import lombok.Data;
 @TableName(value = "user_info")
 @Data
 public class UserInfo {
+
+    // 自定义 @Validated 注解分组
+    public interface UpdateGroup {
+    }
+
     /**
      * 用户ID
      */
     @TableId(value = "user_id")
+    @Size(max = 16)
     private String userId;
 
     /**
      * 昵称
      */
     @TableField(value = "nick_name")
+    @Size(max = 16, groups = UpdateGroup.class)
     private String nickName;
 
     /**
      * 邮箱
      */
     @TableField(value = "email")
+    @Email(groups = UpdateGroup.class)
     private String email;
 
     /**
      * 密码
      */
     @TableField(value = "password")
+    @Size(max = 32, groups = UpdateGroup.class)
     private String password;
 
     /**
      * 个性签名
      */
     @TableField(value = "signature")
+    @Size(max = 50, groups = UpdateGroup.class)
     private String signature;
 
     /**
@@ -62,24 +73,28 @@ public class UserInfo {
      * 0：封禁；1：正常使用
      */
     @TableField(value = "status")
+    @Null(groups = UpdateGroup.class)
     private Integer status;
 
     /**
      * 用户创建时间
      */
     @TableField(value = "create_time")
+    @Null(groups = UpdateGroup.class)
     private LocalDateTime createTime;
 
     /**
      * 最后登录时间
      */
     @TableField(value = "last_login_time")
+    @Null(groups = UpdateGroup.class)
     private LocalDateTime lastLoginTime;
 
     /**
      * 最后下线时间；需要记录到毫秒级
      */
     @TableField(value = "last_off_time")
+    @Null(groups = UpdateGroup.class)
     private Long lastOffTime;
 
     /**
@@ -106,19 +121,7 @@ public class UserInfo {
             return false;
         }
         UserInfo other = (UserInfo) that;
-        return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-                && (this.getNickName() == null ? other.getNickName() == null : this.getNickName().equals(other.getNickName()))
-                && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
-                && (this.getPassword() == null ? other.getPassword() == null : this.getPassword().equals(other.getPassword()))
-                && (this.getSignature() == null ? other.getSignature() == null : this.getSignature().equals(other.getSignature()))
-                && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender()))
-                && (this.getJoinType() == null ? other.getJoinType() == null : this.getJoinType().equals(other.getJoinType()))
-                && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
-                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-                && (this.getLastLoginTime() == null ? other.getLastLoginTime() == null : this.getLastLoginTime().equals(other.getLastLoginTime()))
-                && (this.getLastOffTime() == null ? other.getLastOffTime() == null : this.getLastOffTime().equals(other.getLastOffTime()))
-                && (this.getAreaName() == null ? other.getAreaName() == null : this.getAreaName().equals(other.getAreaName()))
-                && (this.getAreaCode() == null ? other.getAreaCode() == null : this.getAreaCode().equals(other.getAreaCode()));
+        return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId())) && (this.getNickName() == null ? other.getNickName() == null : this.getNickName().equals(other.getNickName())) && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail())) && (this.getPassword() == null ? other.getPassword() == null : this.getPassword().equals(other.getPassword())) && (this.getSignature() == null ? other.getSignature() == null : this.getSignature().equals(other.getSignature())) && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender())) && (this.getJoinType() == null ? other.getJoinType() == null : this.getJoinType().equals(other.getJoinType())) && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus())) && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime())) && (this.getLastLoginTime() == null ? other.getLastLoginTime() == null : this.getLastLoginTime().equals(other.getLastLoginTime())) && (this.getLastOffTime() == null ? other.getLastOffTime() == null : this.getLastOffTime().equals(other.getLastOffTime())) && (this.getAreaName() == null ? other.getAreaName() == null : this.getAreaName().equals(other.getAreaName())) && (this.getAreaCode() == null ? other.getAreaCode() == null : this.getAreaCode().equals(other.getAreaCode()));
     }
 
     @Override
