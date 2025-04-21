@@ -96,7 +96,7 @@ public class AccountController extends BaseController {
             }
 
         } finally {
-            redisService.deleteString(RedisKeys.CODESIGN.getKey() + codeSign);
+            redisService.delete(RedisKeys.CODESIGN.getKey() + codeSign);
         }
     }
 

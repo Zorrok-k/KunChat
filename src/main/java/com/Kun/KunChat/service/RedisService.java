@@ -19,7 +19,7 @@ public interface RedisService {
 
     public Object getValue(String key);
 
-    public void deleteString(String key);
+    public void delete(String key);
 
     public void putHash(String key, Map<String, Object> value);
 
