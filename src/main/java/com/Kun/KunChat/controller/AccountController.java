@@ -114,22 +114,38 @@ public class AccountController extends BaseController {
             redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
             return getSuccessResponse(token);
         } finally {
-
         }
     }
 
     @RequestMapping("/loginVerify")
     public ResponseGlobal<Object> loginVerify(@RequestHeader String token) {
         try {
+            // 解密token获取登录凭证
             String loginId = tokenUtils.parseToken(token);
             if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
                 throw new BusinessException(Status.ERROR_LOGINLOSE);
             }
             String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+            // 返回用户信息
             UserInfo userInfo = userInfoService.getUserById(userId);
             return getSuccessResponse(userInfo);
         } finally {
+        }
+    }
 
+    @RequestMapping("/loginOut")
+    public ResponseGlobal<Object> loginOut(@RequestHeader String token) {
+        try {
+            // 解密token获取登录凭证
+            String loginId = tokenUtils.parseToken(token);
+            if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
+                throw new BusinessException(Status.ERROR_LOGINOUT);
+            }
+            String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+            // 删除用户凭证登出
+            userInfoService.loginOut(loginId, userId);
+            return getSuccessResponse();
+        } finally {
         }
     }
 
