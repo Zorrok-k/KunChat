@@ -32,19 +32,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Autowired
     private RedisService redisService;
 
-    @Transactional
-    public UserInfo loginUpdata(String id) {
-        UserInfo userInfo = new UserInfo();
-        // 生成当前时间
-        LocalDateTime timeNow = LocalDateTime.now();
-        userInfo.setUserId(id);
-        userInfo.setLastLoginTime(timeNow);
-        userInfoMapper.updateById(userInfo);
-        userInfo = userInfoMapper.selectById(id);
-        redisService.setValue("UserInfo::" + id, userInfo);
-        return userInfo;
-    }
-
     @Override
     public UserInfo checkEmail(String email) {
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
@@ -75,18 +62,42 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Cacheable(value = "UserInfo", key = "#id", cacheManager = "CacheManager_User")
     @Override
     public UserInfo getUserById(String id) {
+        log.info("缓存未命中，查询中");
         UserInfo user = userInfoMapper.selectById(id);
         user.setPassword("******");
         return user;
     }
 
+    @Transactional
     @Override
     public UserInfo login(String email, String password) {
-        UserInfo user = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("email", email));
-        if (user.getPassword().equals(password)) {
-            return loginUpdata(user.getUserId());
+        UserInfo user = new UserInfo();
+        user = userInfoMapper.selectOne(new QueryWrapper<UserInfo>().eq("email", email));
+        if (!user.getPassword().equals(password)) {
+            return null;
         }
-        return null;
+        // 通过后更新登录时间
+        String userId = user.getUserId();
+        user.setUserId(userId);
+        // 生成当前时间
+        LocalDateTime timeNow = LocalDateTime.now();
+        user.setLastLoginTime(timeNow);
+        userInfoMapper.updateById(user);
+        user = userInfoMapper.selectById(user.getUserId());
+        // 同时更新缓存数据
+        if (redisService.hasKey("UserInfo::" + user.getUserId())) {
+            redisService.setValue("UserInfo::" + user.getUserId(), user);
+        }
+        return user;
+    }
+
+    @Override
+    public UserInfo updateUser(UserInfo user) {
+        if (user.getUserId() == null) {
+            return null;
+        }
+        userInfoMapper.updateById(user);
+        return userInfoMapper.selectById(user.getUserId());
     }
 
 }
