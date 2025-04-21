@@ -22,6 +22,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 
 
 /**
@@ -37,7 +38,7 @@ import java.time.format.DateTimeFormatter;
 public class RedisConfig {
 
     // 使用 Jackson2JsonRedisSerializer 来序列化和反序列化对象
-    private final FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+    // private final FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
     private final GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
 
     // String 序列化
@@ -57,11 +58,11 @@ public class RedisConfig {
 
         // 设置 key 和 value 的序列化方式
         redisTemplate.setKeySerializer(serializer); // key 使用 String 序列化
-        redisTemplate.setValueSerializer(fastJsonRedisSerializer);
+        redisTemplate.setValueSerializer(genericFastJsonRedisSerializer);
 
         // 设置 hash 的 key 和 value 序列化方式
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(fastJsonRedisSerializer);
+        redisTemplate.setHashValueSerializer(genericFastJsonRedisSerializer);
 
         return redisTemplate;
     }
