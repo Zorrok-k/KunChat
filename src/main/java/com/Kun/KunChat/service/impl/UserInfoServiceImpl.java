@@ -1,5 +1,6 @@
 package com.Kun.KunChat.service.impl;
 
+import com.Kun.KunChat.common.RedisKeys;
 import com.Kun.KunChat.service.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -52,7 +53,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         user.setCreateTime(timeNow);
         // 将时间转换为毫秒
         user.setLastOffTime(timeNow.toInstant(ZoneOffset.of("+8")).toEpochMilli());
-
         // 写入数据库
         userInfoMapper.insert(user);
 
@@ -62,7 +62,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Cacheable(value = "UserInfo", key = "#id", cacheManager = "CacheManager_User")
     @Override
     public UserInfo getUserById(String id) {
-        log.info("缓存未命中，查询中");
+        log.info("缓存未命中id:{}，执行查询", id);
         UserInfo user = userInfoMapper.selectById(id);
         user.setPassword("******");
         return user;
@@ -83,12 +83,28 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         LocalDateTime timeNow = LocalDateTime.now();
         user.setLastLoginTime(timeNow);
         userInfoMapper.updateById(user);
+        // 更新上线时间
         user = userInfoMapper.selectById(user.getUserId());
-        // 同时更新缓存数据
+        // 同时更新缓存数据，如果有
         if (redisService.hasKey("UserInfo::" + user.getUserId())) {
             redisService.setValue("UserInfo::" + user.getUserId(), user);
         }
         return user;
+    }
+
+    @Transactional
+    @Override
+    public void loginOut(String loginId, String userId) {
+        // 注意，这里删的应该是登录凭证而非用户信息的缓存
+        redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
+        UserInfo user = new UserInfo();
+        user.setUserId(userId);
+        // 生成当前时间
+        LocalDateTime timeNow = LocalDateTime.now();
+        // 将时间转换为毫秒
+        user.setLastOffTime(timeNow.toInstant(ZoneOffset.of("+8")).toEpochMilli());
+        // 更新下线时间
+        userInfoMapper.updateById(user);
     }
 
     @Override
