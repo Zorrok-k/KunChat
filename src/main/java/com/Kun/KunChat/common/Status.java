@@ -29,6 +29,7 @@ public enum Status {
     ERROR_LOGINLOSE(1611,"登录已失效！"),
     ERROR_LOGINOUT(1612,"登录已失效！无需退出！"),
     ERROR_EMAILEXITS(1520,"邮箱已存在！"),
+    ERROR_USERIDEXITS(1521,"ID已存在！"),
     ERROR_BUSINESS(1500,"业务异常！"),
     FAILED(2000,"服务器异常！请稍后尝试。");
 
