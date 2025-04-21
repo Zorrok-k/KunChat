@@ -7,15 +7,9 @@ import com.Kun.KunChat.service.UserInfoService;
 import com.wf.captcha.ArithmeticCaptcha;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +28,6 @@ import java.util.UUID;
 @Validated
 public class AccountController extends BaseController {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountController.class);
     @Autowired
     private RedisService redisService;
 
@@ -43,6 +36,22 @@ public class AccountController extends BaseController {
 
     @Autowired
     private TokenUtils tokenUtils;
+
+    // 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
+    private String[] verify(String token, int type) {
+        // 解密token获取登录凭证和用户id
+        String loginId = tokenUtils.parseToken(token);
+        if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
+            // 想抛出不同的异常
+            if (type == 1) {
+                throw new BusinessException(Status.ERROR_LOGINLOSE);
+            } else {
+                throw new BusinessException(Status.ERROR_LOGINOUT);
+            }
+        }
+        String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+        return new String[]{loginId, userId};
+    }
 
     @RequestMapping("/checkCode")
     public ResponseGlobal<Object> checkCode() {
@@ -103,47 +112,59 @@ public class AccountController extends BaseController {
     @RequestMapping("/login")
     public ResponseGlobal<Object> userLogin(@NotEmpty @Email String email, @NotEmpty String password) {
         try {
+            // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
             UserInfo userInfo = userInfoService.login(email, password);
-            if (userInfo == null) {
-                throw new BusinessException(Status.ERROR_LOGIN);
-            }
             // 生成在Redis中的唯一登录ID
             String loginId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
             // 用这个ID加密成Token，传回来解密才能找到是否登录
             String token = tokenUtils.createToken(loginId);
             redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
             return getSuccessResponse(token);
+
         } finally {
         }
     }
 
     @RequestMapping("/loginVerify")
-    public ResponseGlobal<Object> loginVerify(@RequestHeader String token) {
+    public ResponseGlobal<Object> loginVerify(@RequestHeader @NotEmpty String token) {
         try {
-            // 解密token获取登录凭证
-            String loginId = tokenUtils.parseToken(token);
-            if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-                throw new BusinessException(Status.ERROR_LOGINLOSE);
-            }
-            String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+            /**
+             * 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
+             * 异常在 verify() 里抛了，别傻不愣登怀疑自己！老忘记……
+             */
+            String[] result = verify(token, 1);
             // 返回用户信息
-            UserInfo userInfo = userInfoService.getUserById(userId);
+            UserInfo userInfo = userInfoService.getUserById(result[1]);
             return getSuccessResponse(userInfo);
         } finally {
         }
     }
 
-    @RequestMapping("/loginOut")
-    public ResponseGlobal<Object> loginOut(@RequestHeader String token) {
+    @PostMapping(value = "/update", consumes = "application/json")
+    public ResponseGlobal<Object> userUpdate(@RequestHeader @NotEmpty String token, @RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
         try {
-            // 解密token获取登录凭证
-            String loginId = tokenUtils.parseToken(token);
-            if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-                throw new BusinessException(Status.ERROR_LOGINOUT);
+            String[] result = verify(token, 1);
+            userForm.setUserId(result[1]);
+            // 查询邮箱是否重复
+            if (userInfoService.checkEmail(userForm.getEmail()) != null) {
+                throw new BusinessException(Status.ERROR_EMAILEXITS);
             }
-            String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
-            // 删除用户凭证登出
-            userInfoService.loginOut(loginId, userId);
+            // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
+            return getSuccessResponse(userInfoService.updateUser(userForm));
+        } finally {
+        }
+    }
+
+    @RequestMapping("/loginOut")
+    public ResponseGlobal<Object> loginOut(@RequestHeader @NotEmpty String token) {
+        try {
+            /**
+             * 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
+             * 异常在 verify() 里抛了，别傻不愣登怀疑自己！老忘记……
+             */
+            String[] result = verify(token, 2);
+            // 删除用户凭证和登出 同样是开启了事务
+            userInfoService.loginOut(result[0], result[1]);
             return getSuccessResponse();
         } finally {
         }
@@ -151,11 +172,17 @@ public class AccountController extends BaseController {
 
     // 查询一个用户
     @RequestMapping("/test")
-    public ResponseGlobal<Object> getById(@NotEmpty String id) {
+    public ResponseGlobal<Object> update(@RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
         try {
-            return getSuccessResponse(userInfoService.getUserById(id));
+            UserInfo user = new UserInfo();
+            user.setEmail(userForm.getEmail());
+            // 查询邮箱和ID是否重复
+            if (userInfoService.checkEmail(userForm.getEmail()) != null) {
+                throw new BusinessException(Status.ERROR_EMAILEXITS);
+            }
+            // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
+            return getSuccessResponse(userInfoService.updateUser(userForm));
         } finally {
-
         }
     }
 
