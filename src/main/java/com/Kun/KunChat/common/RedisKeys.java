@@ -15,8 +15,8 @@ import lombok.ToString;
 @Getter
 public enum RedisKeys {
 
-    CODESIGN("CodeSign:"),
-    LOGINID("LoginID:");
+    CODESIGN("CodeSign::"),
+    LOGINID("LoginId::");
 
     private String key;
 
