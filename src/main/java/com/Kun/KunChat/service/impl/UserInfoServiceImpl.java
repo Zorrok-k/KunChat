@@ -94,7 +94,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         user = userInfoMapper.selectById(user.getUserId());
         // 同时更新缓存数据，如果有
         if (redisService.hasKey("UserInfo::" + user.getUserId())) {
-            redisService.setValue("UserInfo::" + user.getUserId(), user);
+            redisService.setValue("UserInfo::" + user.getUserId(), user, redisService.getValueTTL("UserInfo::" + user.getUserId()));
         }
         return user;
     }
@@ -124,7 +124,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         user = userInfoMapper.selectById(user.getUserId());
         // 同时更新缓存数据，如果有
         if (redisService.hasKey("UserInfo::" + user.getUserId())) {
-            redisService.setValue("UserInfo::" + user.getUserId(), user);
+            redisService.setValue("UserInfo::" + user.getUserId(), user, redisService.getValueTTL("UserInfo::" + user.getUserId()));
         }
         return user;
     }
