@@ -13,11 +13,13 @@ import java.util.Map;
 
 public interface RedisService {
 
-    public void setValue(String key, Object value, int time);
+    public void setValue(String key, Object value, long time);
 
     public void setValue(String key, Object value);
 
     public Object getValue(String key);
+
+    public long getValueTTL(String key);
 
     public void delete(String key);
 

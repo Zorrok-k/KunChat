@@ -30,7 +30,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public void setValue(String key, Object value, int time) {
+    public void setValue(String key, Object value, long time) {
         redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
     }
 
@@ -42,6 +42,11 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Object getValue(String key) {
         return redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public long getValueTTL(String key) {
+        return redisTemplate.getExpire(key,TimeUnit.SECONDS);
     }
 
     @Override
