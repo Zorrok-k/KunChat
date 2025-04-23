@@ -28,6 +28,7 @@ public enum Status {
     ERROR_LOGIN(1610,"邮箱或密码错误！"),
     ERROR_LOGINLOSE(1611,"登录已失效！"),
     ERROR_LOGINOUT(1612,"登录已失效！无需退出！"),
+    ERROR_ADMIN(1613,"你并非管理员！"),
     ERROR_EMAILEXITS(1520,"邮箱已存在！"),
     ERROR_USERIDEXITS(1521,"ID已存在！"),
     ERROR_BUSINESS(1500,"业务异常！"),
