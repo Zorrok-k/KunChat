@@ -2,8 +2,8 @@ package com.Kun.KunChat.aspect;
 
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.BusinessException;
-import com.Kun.KunChat.common.RedisKeys;
-import com.Kun.KunChat.common.Status;
+import com.Kun.KunChat.StaticVariable.RedisKeys;
+import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.common.TokenUtils;
 import com.Kun.KunChat.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,8 +69,8 @@ public class GlobalOperationAspect {
             throw new BusinessException(Status.ERROR_LOGINLOSE);
         }
         String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
-        // 给被拦截方法传递数据
-        RequestContextHolder.getRequestAttributes().setAttribute("result", userId, RequestAttributes.SCOPE_REQUEST);
+        // 给被拦截方法传递数据 result[0] = loginId; result[1] = userId
+        RequestContextHolder.getRequestAttributes().setAttribute("result", new String[]{loginId, userId}, RequestAttributes.SCOPE_REQUEST);
         if (admin && !userId.equals("Admin")) {
             throw new BusinessException(Status.ERROR_ADMIN);
         }
@@ -80,17 +80,14 @@ public class GlobalOperationAspect {
         // 获取全局的请求
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         String token = request.getHeader("token");
-        if (token == null) {
-            throw new BusinessException(Status.ERROR_LOGINOUT);
+        if (token == null || token.isEmpty()) {
+            return;
         }
         // 解密token获取登录凭证和用户id
         String loginId = tokenUtils.parseToken(token);
         if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-            throw new BusinessException(Status.ERROR_LOGINOUT);
+            redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
         }
-        String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
-        // 给被拦截方法传递数据 result[0] = loginId; result[1] = userId
-        RequestContextHolder.getRequestAttributes().setAttribute("result", new String[]{loginId, userId}, RequestAttributes.SCOPE_REQUEST);
     }
 
 }

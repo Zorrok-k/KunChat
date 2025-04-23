@@ -1,5 +1,6 @@
 package com.Kun.KunChat.common;
 
+import com.Kun.KunChat.StaticVariable.Status;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;

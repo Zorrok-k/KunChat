@@ -1,5 +1,6 @@
 package com.Kun.KunChat.common;
 
+import com.Kun.KunChat.StaticVariable.Status;
 import lombok.Getter;
 /**
  * Author: Beta

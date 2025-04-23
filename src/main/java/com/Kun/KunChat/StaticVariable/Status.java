@@ -1,4 +1,4 @@
-package com.Kun.KunChat.common;
+package com.Kun.KunChat.StaticVariable;
 
 import lombok.Getter;
 import lombok.ToString;
