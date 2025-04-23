@@ -1,5 +1,6 @@
 package com.Kun.KunChat.controller;
 
+import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.*;
 import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
@@ -10,6 +11,8 @@ import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +42,6 @@ public class AccountController extends BaseController {
 
     @Autowired
     private CustomizeUtils customizeUtils;
-
 
 
     @RequestMapping("/checkCode")
@@ -114,26 +116,12 @@ public class AccountController extends BaseController {
         }
     }
 
-    @RequestMapping("/loginVerify")
-    public ResponseGlobal<Object> loginVerify(@RequestHeader @NotEmpty String token) {
-        try {
-            /**
-             * 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
-             * 异常在 verify() 里抛了，别傻不愣登怀疑自己！老忘记……
-             */
-            String[] result = tokenUtils.verify(token, 1);
-            // 返回用户信息
-            UserInfo userInfo = userInfoService.getUserById(result[1]);
-            return getSuccessResponse(userInfo);
-        } finally {
-        }
-    }
-
+    @GlobalInterceptor
     @PostMapping(value = "/update", consumes = "application/json")
-    public ResponseGlobal<Object> userUpdate(@RequestHeader @NotEmpty String token, @RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
+    public ResponseGlobal<Object> userUpdate(@RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
         try {
-            String[] result = tokenUtils.verify(token, 1);
-            userForm.setUserId(result[1]);
+            String userId = (String) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            userForm.setUserId(userId);
             // 查询邮箱是否重复
             if (userInfoService.checkEmail(userForm.getEmail()) != null) {
                 throw new BusinessException(Status.ERROR_EMAILEXITS);
@@ -144,6 +132,7 @@ public class AccountController extends BaseController {
         }
     }
 
+    @GlobalInterceptor(checkLogin = false, checkLogout = true)
     @RequestMapping("/loginOut")
     public ResponseGlobal<Object> loginOut(@RequestHeader @NotEmpty String token) {
         try {
@@ -151,8 +140,9 @@ public class AccountController extends BaseController {
              * 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
              * 异常在 verify() 里抛了，别傻不愣登怀疑自己！老忘记……
              */
-            String[] result = tokenUtils.verify(token, 2);
-            // 删除用户凭证和登出 同样是开启了事务
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            // 删除用户凭证和登出 同样是开启了事务 加了个断言……看看先
+            assert result != null;
             userInfoService.loginOut(result[0], result[1]);
             return getSuccessResponse();
         } finally {
