@@ -45,22 +45,4 @@ public class TokenUtils {
                 .getSubject();  // 获取主题(用户名)
 
     }
-
-    // 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
-    public String[] verify(String token, int type) {
-        // 解密token获取登录凭证和用户id
-        String loginId = parseToken(token);
-        if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-            // 想抛出不同的异常
-            if (type == 1) {
-                throw new BusinessException(Status.ERROR_LOGINLOSE);
-            } else {
-                throw new BusinessException(Status.ERROR_LOGINOUT);
-            }
-        }
-        String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
-        return new String[]{loginId, userId};
-    }
-
-
 }
