@@ -87,6 +87,7 @@
     -->
     <logger name="org.springframework.data.redis" level="info" additivity="false">
         <appender-ref ref="console"/>
+        <appender-ref ref="info_file"/>
         <appender-ref ref="warn_file"/>
         <appender-ref ref="error_file"/>
     </logger>
