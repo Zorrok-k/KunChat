@@ -2,6 +2,8 @@ package com.Kun.KunChat.controller;
 
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.*;
+import com.Kun.KunChat.StaticVariable.RedisKeys;
+import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
 import com.Kun.KunChat.service.UserInfoService;
@@ -9,11 +11,14 @@ import com.wf.captcha.ArithmeticCaptcha;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -100,6 +105,7 @@ public class AccountController extends BaseController {
         }
     }
 
+    @GlobalInterceptor(checkLogin = false, checkLogout = true)
     @RequestMapping("/login")
     public ResponseGlobal<Object> userLogin(@NotEmpty @Email String email, @NotEmpty String password) {
         try {
@@ -111,17 +117,21 @@ public class AccountController extends BaseController {
             String token = tokenUtils.createToken(loginId);
             redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
             return getSuccessResponse(token);
-
         } finally {
         }
     }
 
     @GlobalInterceptor
     @PostMapping(value = "/update", consumes = "application/json")
-    public ResponseGlobal<Object> userUpdate(@RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
+    public ResponseGlobal<Object> userUpdate(@RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm
+    ) {
         try {
-            String userId = (String) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
-            userForm.setUserId(userId);
+            /**
+             * 解密token result[0] = loginId; result[1] = userId
+             */
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            assert result != null;
+            userForm.setUserId(result[1]);
             // 查询邮箱是否重复
             if (userInfoService.checkEmail(userForm.getEmail()) != null) {
                 throw new BusinessException(Status.ERROR_EMAILEXITS);
@@ -132,13 +142,34 @@ public class AccountController extends BaseController {
         }
     }
 
-    @GlobalInterceptor(checkLogin = false, checkLogout = true)
+    // 上传图片：头像、背景  总是报错搞不定只能另外创建一个接口了
+    @GlobalInterceptor
+    @PostMapping("/upLoad")
+    public ResponseGlobal<Object> upLoad(@RequestParam MultipartFile avatar,
+                                         @RequestParam MultipartFile userInfoCover) {
+        try {
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            assert result != null;
+            // 0是传头像 1是传背景图
+            if (avatar != null && !avatar.isEmpty()) {
+                userInfoService.upLoad(avatar, result[1], 0);
+            }
+            if (userInfoCover != null && !userInfoCover.isEmpty()) {
+                userInfoService.upLoad(userInfoCover, result[1], 1);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return getSuccessResponse();
+    }
+
+
+    @GlobalInterceptor
     @RequestMapping("/loginOut")
     public ResponseGlobal<Object> loginOut(@RequestHeader @NotEmpty String token) {
         try {
             /**
-             * 解密token result[0] = loginId; result[1] = userId; type 1 是验证登录获取登录信息，2是登出
-             * 异常在 verify() 里抛了，别傻不愣登怀疑自己！老忘记……
+             * 解密token result[0] = loginId; result[1] = userId
              */
             String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
             // 删除用户凭证和登出 同样是开启了事务 加了个断言……看看先
@@ -149,20 +180,9 @@ public class AccountController extends BaseController {
         }
     }
 
-    // 查询一个用户
     @RequestMapping("/test")
-    public ResponseGlobal<Object> update(@RequestBody @Validated(UserInfo.UpdateGroup.class) UserInfo userForm) {
-        try {
-            UserInfo user = new UserInfo();
-            user.setEmail(userForm.getEmail());
-            // 查询邮箱和ID是否重复
-            if (userInfoService.checkEmail(userForm.getEmail()) != null) {
-                throw new BusinessException(Status.ERROR_EMAILEXITS);
-            }
-            // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
-            return getSuccessResponse(userInfoService.updateUser(userForm));
-        } finally {
-        }
+    public ResponseGlobal<Object> getUser(String id) {
+        return getSuccessResponse(userInfoService.getUserById(id));
     }
 
 }

@@ -1,7 +1,7 @@
 package com.Kun.KunChat.service.impl;
 
 import com.Kun.KunChat.common.CustomizeUtils;
-import com.Kun.KunChat.common.RedisKeys;
+import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.service.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,9 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import static com.Kun.KunChat.StaticVariable.StaticVariable.*;
 
 /**
  * @author Kun
@@ -130,6 +135,25 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
             redisService.setValue("UserInfo::" + user.getUserId(), user, redisService.getValueTTL("UserInfo::" + user.getUserId()));
         }
         return user;
+    }
+
+    @Override
+    public void upLoad(MultipartFile file, String userId, int type) throws IOException {
+        File targetFileFolder = null;
+        switch (type) {
+            // 传用户头像
+            case 0:
+                targetFileFolder = new File(USER_PATH + userId + "/picture", USER_AVATAR_NAME);
+                break;
+            // 传用户信息背景图
+            case 1:
+                targetFileFolder = new File(USER_PATH + userId + "/picture", USERINFO_COVER_NAME);
+                break;
+        }
+        if (!targetFileFolder.exists()) {
+            targetFileFolder.mkdirs();
+        }
+        file.transferTo(targetFileFolder);
     }
 
 }

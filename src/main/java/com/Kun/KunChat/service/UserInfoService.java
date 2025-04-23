@@ -2,6 +2,9 @@ package com.Kun.KunChat.service;
 
 import com.Kun.KunChat.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author Kun
@@ -21,8 +24,10 @@ public interface UserInfoService extends IService<UserInfo> {
 
     UserInfo login(String email, String password);
 
-    void loginOut(String loginId,String userId);
+    void loginOut(String loginId, String userId);
 
     UserInfo updateUser(UserInfo user);
+
+    void upLoad(MultipartFile file, String userId, int type) throws IOException;
 
 }
