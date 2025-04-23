@@ -1,5 +1,6 @@
 package com.Kun.KunChat.service.impl;
 
+import com.Kun.KunChat.common.CustomizeUtils;
 import com.Kun.KunChat.common.RedisKeys;
 import com.Kun.KunChat.service.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
 
 /**
  * @author Kun
@@ -32,6 +32,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private CustomizeUtils customizeUtils;
 
     @Override
     public UserInfo checkEmail(String email) {
@@ -51,7 +54,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     @Override
     public UserInfo addUser(String nikeName, String email, String password) {
         UserInfo user = new UserInfo();
-        user.setUserId(UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+        user.setUserId(customizeUtils.getUUID());
         user.setNickName(nikeName);
         user.setEmail(email);
         user.setPassword(password);
