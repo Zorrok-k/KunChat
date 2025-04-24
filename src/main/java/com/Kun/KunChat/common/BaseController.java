@@ -3,7 +3,6 @@ package com.Kun.KunChat.common;
 
 import com.Kun.KunChat.StaticVariable.Status;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Author: Beta
@@ -20,13 +19,8 @@ public class BaseController {
      * <p>
      * 一般错误 500
      */
-    @Autowired
-    private final ResponseGlobal<Object> responseGlobal;
 
-    public BaseController(ResponseGlobal<Object> responseGlobal) {
-        this.responseGlobal = responseGlobal;
-    }
-
+    private final ResponseGlobal<Object> responseGlobal = new ResponseGlobal<>();
 
     // 无数据返回成功
     protected <T> ResponseGlobal<Object> getSuccessResponse() {
@@ -37,7 +31,7 @@ public class BaseController {
     }
 
     // 带数据返回成功
-    protected <T> ResponseGlobal<Object> getSuccessResponse(T data) {
+    protected <T> ResponseGlobal<Object> getSuccessResponse(Object data) {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
         responseGlobal.setData(data);
