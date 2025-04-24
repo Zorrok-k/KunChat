@@ -26,16 +26,12 @@ public class GroupController extends BaseController {
     @Autowired
     private GroupInfoService groupInfoService;
 
-    public GroupController(ResponseGlobal<Object> responseGlobal) {
-        super(responseGlobal);
-    }
-
     @RequestMapping("/serach")
-    public ResponseGlobal<Object> serach(@RequestParam String groupId,
-                                         @RequestParam String groupName,
-                                         @RequestParam int page) {
+    public ResponseGlobal<Object> serach(@RequestParam(required = false) String groupId,
+                                         @RequestParam(required = false) String groupName,
+                                         @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
-            if (groupId != null) {
+            if (!groupId.isEmpty()) {
                 GroupInfo groupInfo = groupInfoService.getGroupInfo(groupId);
                 if (groupInfo == null) {
                     throw new BusinessException(Status.ERROR_SERACH);
