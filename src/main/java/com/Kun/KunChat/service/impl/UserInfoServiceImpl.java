@@ -1,26 +1,21 @@
 package com.Kun.KunChat.service.impl;
 
-import com.Kun.KunChat.common.CustomizeUtils;
 import com.Kun.KunChat.StaticVariable.RedisKeys;
+import com.Kun.KunChat.common.CustomizeUtils;
+import com.Kun.KunChat.entity.UserInfo;
+import com.Kun.KunChat.mapper.UserInfoMapper;
 import com.Kun.KunChat.service.RedisService;
+import com.Kun.KunChat.service.UserInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.Kun.KunChat.entity.UserInfo;
-import com.Kun.KunChat.service.UserInfoService;
-import com.Kun.KunChat.mapper.UserInfoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import static com.Kun.KunChat.StaticVariable.StaticVariable.*;
 
 /**
  * @author Kun
