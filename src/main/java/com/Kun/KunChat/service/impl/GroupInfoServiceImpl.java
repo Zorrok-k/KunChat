@@ -1,10 +1,12 @@
 package com.Kun.KunChat.service.impl;
 
 import com.Kun.KunChat.common.CustomizeUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.Kun.KunChat.entity.GroupInfo;
-import com.Kun.KunChat.service.GroupInfoService;
 import com.Kun.KunChat.mapper.GroupInfoMapper;
+import com.Kun.KunChat.service.GroupInfoService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,19 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         groupInfoMapper.insert(groupInfo);
 
         return groupInfoMapper.selectById(groupInfo.getGroupId());
+    }
+
+    @Override
+    public GroupInfo getGroupInfo(String groupId) {
+        return groupInfoMapper.selectById(groupId);
+    }
+
+    @Override
+    public <T> Page<GroupInfo> getGroupInfo(String groupName, int page) {
+        // 彩蛋，用的还是做毕设时候的代码，哈哈
+        Page<GroupInfo> thePage = new Page<>(page, 10);
+        groupInfoMapper.selectPage(thePage, new QueryWrapper<GroupInfo>().like("group_name", groupName).or().eq("group_name", groupName));
+        return thePage;
     }
 }
 
