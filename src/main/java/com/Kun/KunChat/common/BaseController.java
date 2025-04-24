@@ -2,6 +2,8 @@ package com.Kun.KunChat.common;
 
 
 import com.Kun.KunChat.StaticVariable.Status;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Author: Beta
@@ -39,6 +41,17 @@ public class BaseController {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
         responseGlobal.setData(data);
+        return responseGlobal;
+    }
+
+    // 返回分页数据
+    protected <T> ResponseGlobal<Object> getSuccessResponse(Page<T> thePage) {
+        responseGlobal.setCode(Status.SUCCEED.getCode());
+        responseGlobal.setMsg(Status.SUCCEED.getMessage());
+        responseGlobal.setPage(thePage.getPages());
+        responseGlobal.setTotal(thePage.getTotal());
+        responseGlobal.setSize(thePage.getSize());
+        responseGlobal.setData(thePage.getRecords());
         return responseGlobal;
     }
 
