@@ -48,6 +48,10 @@ public class AccountController extends BaseController {
     @Autowired
     private CustomizeUtils customizeUtils;
 
+    public AccountController(ResponseGlobal<Object> responseGlobal) {
+        super(responseGlobal);
+    }
+
 
     @RequestMapping("/checkCode")
     public ResponseGlobal<Object> checkCode() {

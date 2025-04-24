@@ -18,10 +18,16 @@ public class BaseController {
      * <p>
      * 一般错误 500
      */
-    private final ResponseGlobal<Object> responseGlobal = new ResponseGlobal<>();
+    @Autowired
+    private final ResponseGlobal<Object> responseGlobal;
+
+    public BaseController(ResponseGlobal<Object> responseGlobal) {
+        this.responseGlobal = responseGlobal;
+    }
+
 
     // 无数据返回成功
-    protected ResponseGlobal<Object> getSuccessResponse() {
+    protected <T> ResponseGlobal<Object> getSuccessResponse() {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
         responseGlobal.setData(null);
@@ -29,7 +35,7 @@ public class BaseController {
     }
 
     // 带数据返回成功
-    protected ResponseGlobal<Object> getSuccessResponse(Object data) {
+    protected <T> ResponseGlobal<Object> getSuccessResponse(T data) {
         responseGlobal.setCode(Status.SUCCEED.getCode());
         responseGlobal.setMsg(Status.SUCCEED.getMessage());
         responseGlobal.setData(data);
@@ -37,14 +43,14 @@ public class BaseController {
     }
 
     // 抛出业务异常时
-    protected ResponseGlobal<Object> getFailedResponse(Integer code, String msg) {
+    protected <T> ResponseGlobal<Object> getFailedResponse(Integer code, String msg) {
         responseGlobal.setCode(code);
         responseGlobal.setMsg(msg);
         responseGlobal.setData(null);
         return responseGlobal;
     }
 
-    protected ResponseGlobal<Object> getFailedResponse(Status status) {
+    protected <T> ResponseGlobal<Object> getFailedResponse(Status status) {
         responseGlobal.setCode(status.getCode());
         responseGlobal.setMsg(status.getMessage());
         responseGlobal.setData(null);
