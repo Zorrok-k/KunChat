@@ -6,8 +6,6 @@ import lombok.ToString;
 /**
  * Author: Beta
  * Date: 2025/4/20 17:11
- * Param:
- * Return:
  * Description: 用于自定义Redis的key
  **/
 

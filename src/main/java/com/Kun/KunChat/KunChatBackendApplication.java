@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.Kun.KunChat"})
-@MapperScan("com.Kun.KunChat.mapper")
+@MapperScan(basePackages = "com.Kun.KunChat.mapper")
 public class KunChatBackendApplication {
 
     public static void main(String[] args) {
