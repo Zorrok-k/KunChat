@@ -17,7 +17,8 @@ public class StaticVariable {
     public static final String USER_AVATAR_NAME = "avatar.jpg";
     public static final String USERINFO_COVER_NAME = "userinfo_cover.jpg";
     // 群组静态资源路径
-    public String GROUP_PATH = null;
+    public static String GROUP_PATH = null;
+    public static final String GROUP_AVATAR_NAME = "avatar.jpg";
     public static final String GROUP_COVER_NAME = "group_cover.jpg";
 
     StaticVariable() {

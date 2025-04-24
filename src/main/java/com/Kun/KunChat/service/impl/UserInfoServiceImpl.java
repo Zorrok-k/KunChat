@@ -29,8 +29,7 @@ import static com.Kun.KunChat.StaticVariable.StaticVariable.*;
  */
 @Slf4j
 @Service
-public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
-        implements UserInfoService {
+public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
 
     @Autowired
     private UserInfoMapper userInfoMapper;
@@ -137,24 +136,6 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return user;
     }
 
-    @Override
-    public void upLoad(MultipartFile file, String userId, int type) throws IOException {
-        File targetFileFolder = null;
-        switch (type) {
-            // 传用户头像
-            case 0:
-                targetFileFolder = new File(USER_PATH + userId + "/picture", USER_AVATAR_NAME);
-                break;
-            // 传用户信息背景图
-            case 1:
-                targetFileFolder = new File(USER_PATH + userId + "/picture", USERINFO_COVER_NAME);
-                break;
-        }
-        if (!targetFileFolder.exists()) {
-            targetFileFolder.mkdirs();
-        }
-        file.transferTo(targetFileFolder);
-    }
 
 }
 

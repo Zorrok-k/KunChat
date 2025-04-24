@@ -152,10 +152,10 @@ public class AccountController extends BaseController {
             assert result != null;
             // 0是传头像 1是传背景图
             if (avatar != null && !avatar.isEmpty()) {
-                userInfoService.upLoad(avatar, result[1], 0);
+                customizeUtils.upLoad(avatar, result[1], 0);
             }
             if (userInfoCover != null && !userInfoCover.isEmpty()) {
-                userInfoService.upLoad(userInfoCover, result[1], 1);
+                customizeUtils.upLoad(userInfoCover, result[1], 1);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
