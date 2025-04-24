@@ -1,6 +1,7 @@
 package com.Kun.KunChat.service;
 
 import com.Kun.KunChat.entity.UserInfo;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -17,7 +18,9 @@ public interface UserInfoService extends IService<UserInfo> {
 
     UserInfo addUser(String nikeName, String email, String password);
 
-    UserInfo getUserById(String id);
+    UserInfo getUser(String id);
+
+    <T> Page<UserInfo> getUser(String nikeName, int page);
 
     UserInfo login(String email, String password);
 

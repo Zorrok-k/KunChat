@@ -7,6 +7,7 @@ import com.Kun.KunChat.mapper.UserInfoMapper;
 import com.Kun.KunChat.service.RedisService;
 import com.Kun.KunChat.service.UserInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,11 +71,18 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Cacheable(value = "UserInfo", key = "#id", cacheManager = "CacheManager_User")
     @Override
-    public UserInfo getUserById(String id) {
+    public UserInfo getUser(String id) {
         log.info("缓存未命中id: {}，执行查询", id);
         UserInfo user = userInfoMapper.selectById(id);
         user.setPassword("******");
         return user;
+    }
+
+    @Override
+    public <T> Page<UserInfo> getUser(String nikeName, int page) {
+        Page<UserInfo> thePage = new Page<>(page, 10, true);
+        userInfoMapper.selectPage(thePage, new QueryWrapper<UserInfo>().like("nick_name", nikeName).or().eq("nick_name", nikeName));
+        return thePage;
     }
 
     @Transactional

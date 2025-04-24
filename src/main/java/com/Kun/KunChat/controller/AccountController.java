@@ -1,9 +1,9 @@
 package com.Kun.KunChat.controller;
 
-import com.Kun.KunChat.annotation.GlobalInterceptor;
-import com.Kun.KunChat.common.*;
 import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.StaticVariable.Status;
+import com.Kun.KunChat.annotation.GlobalInterceptor;
+import com.Kun.KunChat.common.*;
 import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
 import com.Kun.KunChat.service.UserInfoService;
@@ -11,7 +11,6 @@ import com.wf.captcha.ArithmeticCaptcha;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
@@ -47,11 +46,6 @@ public class AccountController extends BaseController {
 
     @Autowired
     private CustomizeUtils customizeUtils;
-
-    public AccountController(ResponseGlobal<Object> responseGlobal) {
-        super(responseGlobal);
-    }
-
 
     @RequestMapping("/checkCode")
     public ResponseGlobal<Object> checkCode() {
@@ -184,9 +178,27 @@ public class AccountController extends BaseController {
         }
     }
 
+    @RequestMapping("/serach")
+    public ResponseGlobal<Object> serach(@RequestParam(required = false) String userId,
+                                         @RequestParam(required = false) String nickName,
+                                         @RequestParam(required = false, defaultValue = "1") Integer page) {
+        try {
+            if (!userId.isEmpty()) {
+                UserInfo userInfo = userInfoService.getUser(userId);
+                if (userInfo == null) {
+                    throw new BusinessException(Status.ERROR_SERACH);
+                }
+                return getSuccessResponse(userInfo);
+            } else {
+                return getSuccessResponse(userInfoService.getUser(nickName, page));
+            }
+        } finally {
+        }
+    }
+
     @RequestMapping("/test")
     public ResponseGlobal<Object> getUser(String id) {
-        return getSuccessResponse(userInfoService.getUserById(id));
+        return getSuccessResponse(userInfoService.getUser(id));
     }
 
 }
