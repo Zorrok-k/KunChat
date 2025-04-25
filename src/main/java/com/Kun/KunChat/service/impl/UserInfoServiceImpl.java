@@ -128,7 +128,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Transactional
     @Override
     public UserInfo updateUser(UserInfo user) {
-        if (user.getUserId() == null) {
+        if (user.getUserId().isEmpty()) {
             return null;
         }
         userInfoMapper.updateById(user);
