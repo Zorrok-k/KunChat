@@ -1,16 +1,19 @@
 package com.Kun.KunChat.controller;
 
 import com.Kun.KunChat.StaticVariable.Status;
+import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.BaseController;
 import com.Kun.KunChat.common.BusinessException;
 import com.Kun.KunChat.common.ResponseGlobal;
 import com.Kun.KunChat.entity.GroupInfo;
 import com.Kun.KunChat.service.GroupInfoService;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * Author: Beta
@@ -25,6 +28,38 @@ public class GroupController extends BaseController {
 
     @Autowired
     private GroupInfoService groupInfoService;
+
+    @PostMapping("/create")
+    @GlobalInterceptor
+    public ResponseGlobal<Object> groupCreate(@RequestParam @NotEmpty String groupName,
+                                              @RequestParam @NotNull Integer joinType) {
+        try {
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            assert result != null;
+            // 创建群组
+            return getSuccessResponse(groupInfoService.createGroup(result[1], groupName, joinType));
+        } finally {
+        }
+
+    }
+
+    @PostMapping("/update")
+    @GlobalInterceptor
+    public ResponseGlobal<Object> groupUpdate(@RequestBody @Validated(GroupInfo.UpdateGroup.class) GroupInfo groupInfo) {
+        try {
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            assert result != null;
+            GroupInfo groupDataBase = groupInfoService.getGroupInfo(groupInfo.getGroupId());
+            if (!groupDataBase.getOwnerId().equalsIgnoreCase(result[1])) {
+                throw new BusinessException(Status.ERROR_ACTION);
+            }
+            if (groupInfoService.getGroupInfo(groupInfo.getGroupId()).getStatus() == 0) {
+                throw new BusinessException(Status.ERROR_GROUPDEL);
+            }
+            return getSuccessResponse(groupInfoService.updateGroupInfo(groupInfo));
+        } finally {
+        }
+    }
 
     @RequestMapping("/serach")
     public ResponseGlobal<Object> serach(@RequestParam(required = false) String groupId,
@@ -42,6 +77,12 @@ public class GroupController extends BaseController {
             }
         } finally {
         }
+    }
+
+    @RequestMapping("/test")
+    @GlobalInterceptor
+    public ResponseGlobal<Object> tttset() {
+        return getSuccessResponse();
     }
 
 }
