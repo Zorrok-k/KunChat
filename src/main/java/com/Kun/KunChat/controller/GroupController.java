@@ -61,6 +61,22 @@ public class GroupController extends BaseController {
         }
     }
 
+    @RequestMapping("/delete")
+    @GlobalInterceptor
+    public ResponseGlobal<Object> deleteGroup(@RequestParam @NotEmpty String groupId) {
+        try {
+            String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+            assert result != null;
+            GroupInfo groupDataBase = groupInfoService.getGroupInfo(groupId);
+            if (!groupDataBase.getOwnerId().equalsIgnoreCase(result[1])) {
+                throw new BusinessException(Status.ERROR_ACTION);
+            }
+            return getSuccessResponse(groupInfoService.deleteGroupInfo(groupId));
+        } finally {
+        }
+    }
+
+
     @RequestMapping("/serach")
     public ResponseGlobal<Object> serach(@RequestParam(required = false) String groupId,
                                          @RequestParam(required = false) String groupName,

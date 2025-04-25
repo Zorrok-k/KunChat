@@ -44,7 +44,11 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
     @Override
     public GroupInfo getGroupInfo(String groupId) {
-        return groupInfoMapper.selectById(groupId);
+        GroupInfo groupInfo = groupInfoMapper.selectById(groupId);
+        if (groupInfo.getStatus() == 0) {
+            return null;
+        }
+        return groupInfo;
     }
 
     @Override
