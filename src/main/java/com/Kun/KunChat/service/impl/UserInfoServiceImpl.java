@@ -81,7 +81,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public <T> Page<UserInfo> getUser(String nikeName, int page) {
         Page<UserInfo> thePage = new Page<>(page, 10, true);
-        userInfoMapper.selectPage(thePage, new QueryWrapper<UserInfo>().like("nick_name", nikeName).or().eq("nick_name", nikeName));
+        // 排除密码字段
+        userInfoMapper.selectPage(thePage, new QueryWrapper<UserInfo>().select(UserInfo.class, i -> !i.getProperty().equals("password")).like("nick_name", nikeName).or().eq("nick_name", nikeName));
         return thePage;
     }
 
