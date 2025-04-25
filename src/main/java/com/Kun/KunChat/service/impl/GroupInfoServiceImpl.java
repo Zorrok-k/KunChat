@@ -51,7 +51,7 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
     public <T> Page<GroupInfo> getGroupInfo(String groupName, int page) {
         // 彩蛋，用的还是做毕设时候的代码，哈哈
         Page<GroupInfo> thePage = new Page<>(page, 10, true);
-        groupInfoMapper.selectPage(thePage, new QueryWrapper<GroupInfo>().like("group_name", groupName).or().eq("group_name", groupName));
+        groupInfoMapper.selectPage(thePage, new QueryWrapper<GroupInfo>().like("group_name", groupName).eq("status", 1));
         return thePage;
     }
 
