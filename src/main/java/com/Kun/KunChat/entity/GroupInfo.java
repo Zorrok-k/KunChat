@@ -3,6 +3,7 @@ package com.Kun.KunChat.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -23,21 +24,22 @@ public class GroupInfo {
      * 群组ID
      */
     @TableId(value = "group_id")
-    @Size(max = 16)
+    @Size(max = 16, groups = GroupInfo.UpdateGroup.class)
+    @NotEmpty(groups = GroupInfo.UpdateGroup.class)
     private String groupId;
 
     /**
      * 群组名
      */
     @TableField(value = "group_name")
-    @Size(max = 20)
+    @Size(max = 20, groups = GroupInfo.UpdateGroup.class)
     private String groupName;
 
     /**
      * 群主ID
      */
     @TableField(value = "owner_id")
-    @Size(max = 16)
+    @Size(max = 16, groups = GroupInfo.UpdateGroup.class)
     private String ownerId;
 
     /**
@@ -51,7 +53,7 @@ public class GroupInfo {
      * 群公告
      */
     @TableField(value = "notice")
-    @Size(max = 500)
+    @Size(max = 500, groups = GroupInfo.UpdateGroup.class)
     private String notice;
 
     /**
