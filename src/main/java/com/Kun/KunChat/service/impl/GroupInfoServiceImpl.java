@@ -63,6 +63,16 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         groupInfoMapper.updateById(groupInfo);
         return groupInfoMapper.selectById(groupInfo.getGroupId());
     }
+
+    @Override
+    public GroupInfo deleteGroupInfo(String groupId) {
+        GroupInfo groupInfo = groupInfoMapper.selectById(groupId);
+        if (groupInfo != null) {
+            groupInfo.setStatus(0);
+            groupInfoMapper.updateById(groupInfo);
+        }
+        return groupInfoMapper.selectById(groupId);
+    }
 }
 
 

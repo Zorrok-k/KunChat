@@ -19,4 +19,6 @@ public interface GroupInfoService extends IService<GroupInfo> {
 
     GroupInfo updateGroupInfo(GroupInfo groupInfo);
 
+    GroupInfo deleteGroupInfo(String groupId);
+
 }
