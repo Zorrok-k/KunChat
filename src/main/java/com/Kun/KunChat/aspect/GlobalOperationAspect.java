@@ -1,16 +1,19 @@
 package com.Kun.KunChat.aspect;
 
-import com.Kun.KunChat.annotation.GlobalInterceptor;
-import com.Kun.KunChat.common.BusinessException;
 import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.StaticVariable.Status;
+import com.Kun.KunChat.annotation.GlobalInterceptor;
+import com.Kun.KunChat.common.BusinessException;
 import com.Kun.KunChat.common.TokenUtils;
+import com.Kun.KunChat.service.GroupInfoService;
 import com.Kun.KunChat.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -30,8 +33,12 @@ import java.util.Objects;
 @Aspect
 public class GlobalOperationAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalOperationAspect.class);
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private GroupInfoService groupInfoService;
 
     @Autowired
     private TokenUtils tokenUtils;
@@ -45,24 +52,25 @@ public class GlobalOperationAspect {
             if (null == interceptor) {
                 return;
             }
+            // 获取全局的请求
+            HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
             // 校验登录
             if (interceptor.checkLogin() || interceptor.checkAdmin()) {
-                checkLogin(interceptor.checkAdmin());
+                checkLogin(request, interceptor.checkAdmin());
             }
             // 校验登出
             if (interceptor.checkLogout()) {
-                checkLoginOut();
+                checkLoginOut(request);
             }
-
         } finally {
-
         }
     }
 
-    private void checkLogin(boolean admin) {
-        // 获取全局的请求
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+    private void checkLogin(HttpServletRequest request, boolean admin) {
         String token = request.getHeader("token");
+        if (token == null || token.isEmpty()) {
+            throw new BusinessException(Status.ERROR_NOTLOGIN);
+        }
         // 解密token获取登录凭证和用户id
         String loginId = tokenUtils.parseToken(token);
         if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
@@ -70,15 +78,13 @@ public class GlobalOperationAspect {
         }
         String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
         // 给被拦截方法传递数据 result[0] = loginId; result[1] = userId
-        RequestContextHolder.getRequestAttributes().setAttribute("result", new String[]{loginId, userId}, RequestAttributes.SCOPE_REQUEST);
+        Objects.requireNonNull(RequestContextHolder.getRequestAttributes()).setAttribute("result", new String[]{loginId, userId}, RequestAttributes.SCOPE_REQUEST);
         if (admin && !userId.equals("Admin")) {
             throw new BusinessException(Status.ERROR_ADMIN);
         }
     }
 
-    private void checkLoginOut() {
-        // 获取全局的请求
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+    private void checkLoginOut(HttpServletRequest request) {
         String token = request.getHeader("token");
         if (token == null || token.isEmpty()) {
             return;
