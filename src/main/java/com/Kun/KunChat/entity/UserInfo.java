@@ -3,11 +3,12 @@ package com.Kun.KunChat.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-
-import jakarta.validation.constraints.*;
-import lombok.Data;
 
 /**
  * 用户信息
