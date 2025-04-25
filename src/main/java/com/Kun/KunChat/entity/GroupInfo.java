@@ -1,47 +1,57 @@
 package com.Kun.KunChat.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
- * 
  * @TableName group_info
  */
-@TableName(value ="group_info")
+@TableName(value = "group_info")
 @Data
 public class GroupInfo {
+    // 自定义 @Validated 注解分组
+    public interface UpdateGroup {
+    }
+
     /**
      * 群组ID
      */
     @TableId(value = "group_id")
+    @Size(max = 16)
     private String groupId;
 
     /**
      * 群组名
      */
     @TableField(value = "group_name")
+    @Size(max = 20)
     private String groupName;
 
     /**
      * 群主ID
      */
     @TableField(value = "owner_id")
+    @Size(max = 16)
     private String ownerId;
 
     /**
      * 创建时间
      */
     @TableField(value = "create_time")
+    @Null(groups = GroupInfo.UpdateGroup.class)
     private LocalDateTime createTime;
 
     /**
      * 群公告
      */
     @TableField(value = "notice")
+    @Size(max = 500)
     private String notice;
 
     /**
@@ -54,6 +64,7 @@ public class GroupInfo {
      * 群组状态 1：正常；0：封禁
      */
     @TableField(value = "status")
+    @Null(groups = GroupInfo.UpdateGroup.class)
     private Integer status;
 
     @Override
@@ -69,12 +80,12 @@ public class GroupInfo {
         }
         GroupInfo other = (GroupInfo) that;
         return (this.getGroupId() == null ? other.getGroupId() == null : this.getGroupId().equals(other.getGroupId()))
-            && (this.getGroupName() == null ? other.getGroupName() == null : this.getGroupName().equals(other.getGroupName()))
-            && (this.getOwnerId() == null ? other.getOwnerId() == null : this.getOwnerId().equals(other.getOwnerId()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getNotice() == null ? other.getNotice() == null : this.getNotice().equals(other.getNotice()))
-            && (this.getJoinType() == null ? other.getJoinType() == null : this.getJoinType().equals(other.getJoinType()))
-            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()));
+                && (this.getGroupName() == null ? other.getGroupName() == null : this.getGroupName().equals(other.getGroupName()))
+                && (this.getOwnerId() == null ? other.getOwnerId() == null : this.getOwnerId().equals(other.getOwnerId()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getNotice() == null ? other.getNotice() == null : this.getNotice().equals(other.getNotice()))
+                && (this.getJoinType() == null ? other.getJoinType() == null : this.getJoinType().equals(other.getJoinType()))
+                && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()));
     }
 
     @Override

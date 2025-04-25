@@ -54,6 +54,15 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         groupInfoMapper.selectPage(thePage, new QueryWrapper<GroupInfo>().like("group_name", groupName).or().eq("group_name", groupName));
         return thePage;
     }
+
+    @Override
+    public GroupInfo updateGroupInfo(GroupInfo groupInfo) {
+        if (groupInfo.getGroupId().isEmpty()) {
+            return null;
+        }
+        groupInfoMapper.updateById(groupInfo);
+        return groupInfoMapper.selectById(groupInfo.getGroupId());
+    }
 }
 
 

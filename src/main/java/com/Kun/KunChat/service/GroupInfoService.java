@@ -17,4 +17,6 @@ public interface GroupInfoService extends IService<GroupInfo> {
 
     <T> Page<GroupInfo> getGroupInfo(String groupName, int page);
 
+    GroupInfo updateGroupInfo(GroupInfo groupInfo);
+
 }
