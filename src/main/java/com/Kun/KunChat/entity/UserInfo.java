@@ -34,28 +34,28 @@ public class UserInfo {
      * 昵称
      */
     @TableField(value = "nick_name")
-    @Size(max = 16, groups = UpdateGroup.class)
+    @Size(max = 16, groups = UserInfo.UpdateGroup.class)
     private String nickName;
 
     /**
      * 邮箱
      */
     @TableField(value = "email")
-    @Email(groups = UpdateGroup.class)
+    @Email(groups = UserInfo.UpdateGroup.class)
     private String email;
 
     /**
      * 密码
      */
     @TableField(value = "password")
-    @Size(max = 32, groups = UpdateGroup.class)
+    @Size(max = 32, groups = UserInfo.UpdateGroup.class)
     private String password;
 
     /**
      * 个性签名
      */
     @TableField(value = "signature")
-    @Size(max = 50, groups = UpdateGroup.class)
+    @Size(max = 50, groups = UserInfo.UpdateGroup.class)
     private String signature;
 
     /**
@@ -74,28 +74,28 @@ public class UserInfo {
      * 0：封禁；1：正常使用
      */
     @TableField(value = "status")
-    @Null(groups = UpdateGroup.class)
+    @Null(groups = UserInfo.UpdateGroup.class)
     private Integer status;
 
     /**
      * 用户创建时间
      */
     @TableField(value = "create_time")
-    @Null(groups = UpdateGroup.class)
+    @Null(groups = UserInfo.UpdateGroup.class)
     private LocalDateTime createTime;
 
     /**
      * 最后登录时间
      */
     @TableField(value = "last_login_time")
-    @Null(groups = UpdateGroup.class)
+    @Null(groups = UserInfo.UpdateGroup.class)
     private LocalDateTime lastLoginTime;
 
     /**
      * 最后下线时间；需要记录到毫秒级
      */
     @TableField(value = "last_off_time")
-    @Null(groups = UpdateGroup.class)
+    @Null(groups = UserInfo.UpdateGroup.class)
     private Long lastOffTime;
 
     /**
