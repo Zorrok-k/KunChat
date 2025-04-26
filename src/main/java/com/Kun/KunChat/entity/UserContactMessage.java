@@ -41,7 +41,7 @@ public class UserContactMessage {
      * 申请建立联系的ID，用户或群组
      */
     @TableField(value = "contact_id")
-    private Integer contactId;
+    private String contactId;
 
     /**
      * 该消息状态：0 待处理  1 已同意  2 已拒绝  3 已拉黑
