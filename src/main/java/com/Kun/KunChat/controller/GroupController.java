@@ -49,14 +49,14 @@ public class GroupController extends BaseController {
         try {
             String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
             assert result != null;
-            GroupInfo groupDataBase = groupInfoService.getGroupInfo(groupInfo.getGroupId());
+            GroupInfo groupDataBase = groupInfoService.getGroup(groupInfo.getGroupId());
             if (!groupDataBase.getOwnerId().equalsIgnoreCase(result[1])) {
                 throw new BusinessException(Status.ERROR_ACTION);
             }
-            if (groupInfoService.getGroupInfo(groupInfo.getGroupId()).getStatus() == 0) {
+            if (groupInfoService.getGroup(groupInfo.getGroupId()).getStatus() == 0) {
                 throw new BusinessException(Status.ERROR_GROUPDEL);
             }
-            return getSuccessResponse(groupInfoService.updateGroupInfo(groupInfo));
+            return getSuccessResponse(groupInfoService.updateGroup(groupInfo));
         } finally {
         }
     }
@@ -67,11 +67,11 @@ public class GroupController extends BaseController {
         try {
             String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
             assert result != null;
-            GroupInfo groupDataBase = groupInfoService.getGroupInfo(groupId);
+            GroupInfo groupDataBase = groupInfoService.getGroup(groupId);
             if (!groupDataBase.getOwnerId().equalsIgnoreCase(result[1])) {
                 throw new BusinessException(Status.ERROR_ACTION);
             }
-            return getSuccessResponse(groupInfoService.deleteGroupInfo(groupId));
+            return getSuccessResponse(groupInfoService.deleteGroup(groupId));
         } finally {
         }
     }
@@ -83,13 +83,13 @@ public class GroupController extends BaseController {
                                          @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
             if (!groupId.isEmpty()) {
-                GroupInfo groupInfo = groupInfoService.getGroupInfo(groupId);
+                GroupInfo groupInfo = groupInfoService.getGroup(groupId);
                 if (groupInfo == null) {
                     throw new BusinessException(Status.ERROR_SERACH);
                 }
                 return getSuccessResponse(groupInfo);
             } else {
-                return getSuccessResponse(groupInfoService.getGroupInfo(groupName, page));
+                return getSuccessResponse(groupInfoService.getGroup(groupName, page));
             }
         } finally {
         }
