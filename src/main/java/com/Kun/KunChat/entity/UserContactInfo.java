@@ -1,17 +1,16 @@
 package com.Kun.KunChat.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
- * 
  * @TableName user_contact_info
  */
-@TableName(value ="user_contact_info")
+@TableName(value = "user_contact_info")
 @Data
 public class UserContactInfo {
     /**
@@ -39,7 +38,7 @@ public class UserContactInfo {
     private Integer type;
 
     /**
-     * 此ID对目标ID的状态；0：好友  1：删除  2：拉黑  3：被删除  4：被拉黑
+     * 此ID对目标ID的状态；0：等待处理  1：好友  2：删除  3：拉黑  4：被删除  5：被拉黑
      */
     @TableField(value = "status")
     private Integer status;
@@ -69,12 +68,12 @@ public class UserContactInfo {
         }
         UserContactInfo other = (UserContactInfo) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getContactId() == null ? other.getContactId() == null : this.getContactId().equals(other.getContactId()))
-            && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
-            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getLastUpdate() == null ? other.getLastUpdate() == null : this.getLastUpdate().equals(other.getLastUpdate()));
+                && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+                && (this.getContactId() == null ? other.getContactId() == null : this.getContactId().equals(other.getContactId()))
+                && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
+                && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getLastUpdate() == null ? other.getLastUpdate() == null : this.getLastUpdate().equals(other.getLastUpdate()));
     }
 
     @Override
