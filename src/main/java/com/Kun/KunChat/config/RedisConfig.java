@@ -75,7 +75,7 @@ public class RedisConfig {
     public CacheManager cacheManager1(RedisConnectionFactory redisConnectionFactory) {
 
         // 配置自动缓存的序列化
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericFastJsonRedisSerializer)).disableCachingNullValues();
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(24)).serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericFastJsonRedisSerializer)).disableCachingNullValues();
 
         return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config).build();
     }
