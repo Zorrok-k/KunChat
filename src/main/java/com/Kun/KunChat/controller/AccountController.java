@@ -109,11 +109,21 @@ public class AccountController extends BaseController {
         try {
             // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
             UserInfo userInfo = userInfoService.login(email, password);
+            // 如果为空 说明账号或密码错误 抛出异常
+            if (userInfo == null) {
+                throw new BusinessException(Status.ERROR_LOGIN);
+            }
             // 生成在Redis中的唯一登录ID
             String loginId = customizeUtils.getUUID();
             // 用这个ID加密成Token，传回来解密才能找到是否登录
             String token = tokenUtils.createToken(loginId);
             redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
+            /**
+             * 有点骑虎难下的感觉。本来这个token解密之后才能拿到登录信息，现在又非要公开一个key去拿登录信息的key，等于解密是一个摆设
+             *
+             * 但是没办法，不这样公开我在另一个没有token的设备就找不到登录信息，就没办法下线
+             */
+            redisService.setValue("CheckLoginOut::" + email, loginId);
             return getSuccessResponse(token);
         } finally {
         }
@@ -173,6 +183,7 @@ public class AccountController extends BaseController {
             // 删除用户凭证和登出 同样是开启了事务 加了个断言……看看先
             assert result != null;
             userInfoService.loginOut(result[0], result[1]);
+            redisService.delete("CheckLoginOut::" + userInfoService.getUser(result[1]).getEmail());
             return getSuccessResponse();
         } finally {
         }
@@ -195,10 +206,4 @@ public class AccountController extends BaseController {
         } finally {
         }
     }
-
-    @RequestMapping("/test")
-    public ResponseGlobal<Object> getUser(String id) {
-        return getSuccessResponse(userInfoService.getUser(id));
-    }
-
 }

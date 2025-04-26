@@ -85,14 +85,12 @@ public class GlobalOperationAspect {
     }
 
     private void checkLoginOut(HttpServletRequest request) {
-        String token = request.getHeader("token");
-        if (token == null || token.isEmpty()) {
-            return;
-        }
-        // 解密token获取登录凭证和用户id
-        String loginId = tokenUtils.parseToken(token);
-        if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-            redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
+        // 强制退出
+        if (redisService.hasKey("CheckLoginOut::" + request.getParameter("email"))) {
+            String loginId = redisService.getValue("CheckLoginOut::" + request.getParameter("email")).toString();
+            if (redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
+                redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
+            }
         }
     }
 
