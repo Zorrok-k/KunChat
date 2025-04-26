@@ -12,9 +12,13 @@ import java.util.List;
  */
 public interface UserContactInfoService extends IService<UserContactInfo> {
 
-    UserContactInfo buildContact(String userId, String contactId, int type, int status);
+    // UserContactInfo buildContact(String userId, String contactId, int type);
+
+    void buildContact(String userId, String contactId, int type,int status);
 
     UserContactInfo updateStatus(String userId, String contactId, int status);
+
+    UserContactInfo getUserContactInfo(String userId, String contactId);
 
     List<String> getUserContactInfo(String userId, int type);
 }

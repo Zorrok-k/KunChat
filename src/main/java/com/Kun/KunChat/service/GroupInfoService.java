@@ -13,7 +13,7 @@ public interface GroupInfoService extends IService<GroupInfo> {
 
     GroupInfo createGroup(String userId, String groupName, int joinType);
 
-    GroupInfo getGroup(String groupId);
+    GroupInfo getGroup(String id);
 
     <T> Page<GroupInfo> getGroup(String groupName, int page);
 

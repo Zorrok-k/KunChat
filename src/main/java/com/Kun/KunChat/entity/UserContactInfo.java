@@ -3,6 +3,8 @@ package com.Kun.KunChat.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,9 @@ import java.time.LocalDateTime;
 @TableName(value = "user_contact_info")
 @Data
 public class UserContactInfo {
+    public interface UpdateGroup {
+    }
+
     /**
      * Mybatis Plus 不能使用联合主键，这个是凑数用的
      */
@@ -23,36 +28,42 @@ public class UserContactInfo {
      * 所属用户ID
      */
     @TableField(value = "user_id")
+    @Null(groups = UserContactInfo.UpdateGroup.class)
     private String userId;
 
     /**
      * 与之产生联系的用户ID或群组ID
      */
     @TableField(value = "contact_id")
+    @NotEmpty(groups = UserContactInfo.UpdateGroup.class)
     private String contactId;
 
     /**
      * 0：代表好友关系；1：代表群组关系
      */
     @TableField(value = "type")
+    @Null(groups = UserContactInfo.UpdateGroup.class)
     private Integer type;
 
     /**
-     * 此ID对目标ID的状态；0：等待处理  1：好友  2：删除  3：拉黑  4：被删除  5：被拉黑
+     * 此ID对目标ID的状态；0：等待处理  1：产生联系（好友、群组）  2：删除  3：拉黑  4：被删除  5：被拉黑
      */
     @TableField(value = "status")
+    @Null(groups = UserContactInfo.UpdateGroup.class)
     private Integer status;
 
     /**
      * 关系创建时间
      */
     @TableField(value = "create_time")
+    @Null(groups = UserContactInfo.UpdateGroup.class)
     private LocalDateTime createTime;
 
     /**
      * 最后更新时间
      */
     @TableField(value = "last_update")
+    @Null(groups = UserContactInfo.UpdateGroup.class)
     private LocalDateTime lastUpdate;
 
     @Override

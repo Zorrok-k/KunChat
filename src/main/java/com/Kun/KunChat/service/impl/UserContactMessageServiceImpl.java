@@ -27,6 +27,11 @@ public class UserContactMessageServiceImpl extends ServiceImpl<UserContactMessag
     }
 
     @Override
+    public UserContactMessage getMessage(int id) {
+        return userContactMessageMapper.selectById(id);
+    }
+
+    @Override
     public UserContactMessage getMessage(String applicantId, String contactId) {
         return userContactMessageMapper.selectOne(new QueryWrapper<UserContactMessage>()
                 .eq("applicant_id", applicantId).eq("contact_id", contactId));

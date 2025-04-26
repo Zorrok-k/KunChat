@@ -36,6 +36,8 @@ public enum Status {
     ERROR_LOGINLOSE(1612, "登录已失效！"),
     ERROR_LOGINOUT(1613, "登录已失效！无需退出！"),
     ERROR_ADMIN(1614, "你并非管理员！"),
+    ERROR_BLACK(1620, "已被拉黑！"),
+    ERROR_CONTACTREPEAT(1621,"关系重复请求！"),
     ERROR_BUSINESS(1500, "业务异常！"),
     FAILED(2000, "服务器异常！请稍后尝试。");
 

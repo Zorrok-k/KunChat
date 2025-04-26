@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 /**
@@ -12,6 +15,10 @@ import lombok.Data;
 @TableName(value = "user_contact_message")
 @Data
 public class UserContactMessage {
+    // 自定义 @Validated 注解分组
+    public interface UpdateGroup {
+    }
+
     /**
      * 消息自增ID
      */
@@ -22,30 +29,35 @@ public class UserContactMessage {
      * 申请者ID
      */
     @TableField(value = "applicant_id")
+    @Null(groups = UserContactMessage.UpdateGroup.class)
     private String applicantId;
 
     /**
      * 受理者ID
      */
     @TableField(value = "acceptor_id")
+    @Null(groups = UserContactMessage.UpdateGroup.class)
     private String acceptorId;
 
     /**
      * 申请类型：0 好友  1 群组
      */
     @TableField(value = "type")
+    @NotNull(groups = UserContactMessage.UpdateGroup.class)
     private Integer type;
 
     /**
      * 申请建立联系的ID，用户或群组
      */
     @TableField(value = "contact_id")
+    @NotEmpty(groups = UserContactMessage.UpdateGroup.class)
     private String contactId;
 
     /**
      * 该消息状态：0 待处理  1 已同意  2 已拒绝  3 已拉黑  4 已忽略
      */
     @TableField(value = "status")
+    @Null(groups = UserContactMessage.UpdateGroup.class)
     private Integer status;
 
     /**
@@ -58,6 +70,7 @@ public class UserContactMessage {
      * 最后申请时间
      */
     @TableField(value = "last_apply_time")
+    @Null(groups = UserContactMessage.UpdateGroup.class)
     private Long lastApplyTime;
 
     @Override

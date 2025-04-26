@@ -12,6 +12,8 @@ public interface UserContactMessageService extends IService<UserContactMessage> 
 
     UserContactMessage addMessage(UserContactMessage userContactMessage);
 
+    UserContactMessage getMessage(int id);
+
     UserContactMessage getMessage(String applicantId, String contactId);
 
     UserContactMessage updateMessage(UserContactMessage userContactMessage);

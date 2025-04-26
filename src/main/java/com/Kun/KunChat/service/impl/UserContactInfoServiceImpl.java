@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,8 +29,24 @@ public class UserContactInfoServiceImpl extends ServiceImpl<UserContactInfoMappe
     @Autowired
     private CustomizeUtils customizeUtils;
 
+    // @Override
+    // public UserContactInfo buildContact(String userId, String contactId, int type) {
+    //     // 生成当前时间
+    //     LocalDateTime timeNow = LocalDateTime.now();
+    //     UserContactInfo userContactInfo = new UserContactInfo();
+    //     userContactInfo.setId(customizeUtils.getUUID());
+    //     userContactInfo.setUserId(userId);
+    //     userContactInfo.setContactId(contactId);
+    //     userContactInfo.setType(type);
+    //     userContactInfo.setCreateTime(timeNow);
+    //     userContactInfo.setLastUpdate(timeNow);
+    //     userContactInfoMapper.insert(userContactInfo);
+    //     return userContactInfoMapper.selectById(userContactInfo.getId());
+    // }
+
     @Override
-    public UserContactInfo buildContact(String userId, String contactId, int type, int status) {
+    @Transactional
+    public void buildContact(String userId, String contactId, int type, int status) {
         // 生成当前时间
         LocalDateTime timeNow = LocalDateTime.now();
         UserContactInfo userContactInfo = new UserContactInfo();
@@ -39,19 +56,30 @@ public class UserContactInfoServiceImpl extends ServiceImpl<UserContactInfoMappe
         userContactInfo.setType(type);
         userContactInfo.setStatus(status);
         userContactInfo.setCreateTime(timeNow);
+        userContactInfo.setLastUpdate(timeNow);
         userContactInfoMapper.insert(userContactInfo);
-        return userContactInfoMapper.selectById(userContactInfo.getId());
+        userContactInfo.setUserId(contactId);
+        userContactInfo.setContactId(userId);
+        userContactInfoMapper.insert(userContactInfo);
     }
 
     @Override
     public UserContactInfo updateStatus(String userId, String contactId, int status) {
+        // 生成当前时间
+        LocalDateTime timeNow = LocalDateTime.now();
         String id = userContactInfoMapper.selectOne(new QueryWrapper<UserContactInfo>()
                 .eq("user_id", userId).eq("contact_id", contactId)).getId();
         UserContactInfo userContactInfo = new UserContactInfo();
         userContactInfo.setId(id);
         userContactInfo.setStatus(status);
+        userContactInfo.setLastUpdate(timeNow);
         userContactInfoMapper.updateById(userContactInfo);
         return userContactInfoMapper.selectById(id);
+    }
+
+    @Override
+    public UserContactInfo getUserContactInfo(String userId, String contactId) {
+        return userContactInfoMapper.selectOne(new QueryWrapper<UserContactInfo>().eq("user_id", userId).eq("contact_id", contactId));
     }
 
     @Override
