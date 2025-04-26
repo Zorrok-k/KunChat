@@ -7,10 +7,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
- * 
  * @TableName user_contact_message
  */
-@TableName(value ="user_contact_message")
+@TableName(value = "user_contact_message")
 @Data
 public class UserContactMessage {
     /**
@@ -44,7 +43,7 @@ public class UserContactMessage {
     private String contactId;
 
     /**
-     * 该消息状态：0 待处理  1 已同意  2 已拒绝  3 已拉黑
+     * 该消息状态：0 待处理  1 已同意  2 已拒绝  3 已拉黑  4 已忽略
      */
     @TableField(value = "status")
     private Integer status;
@@ -74,13 +73,13 @@ public class UserContactMessage {
         }
         UserContactMessage other = (UserContactMessage) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getApplicantId() == null ? other.getApplicantId() == null : this.getApplicantId().equals(other.getApplicantId()))
-            && (this.getAcceptorId() == null ? other.getAcceptorId() == null : this.getAcceptorId().equals(other.getAcceptorId()))
-            && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
-            && (this.getContactId() == null ? other.getContactId() == null : this.getContactId().equals(other.getContactId()))
-            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
-            && (this.getApplyInfo() == null ? other.getApplyInfo() == null : this.getApplyInfo().equals(other.getApplyInfo()))
-            && (this.getLastApplyTime() == null ? other.getLastApplyTime() == null : this.getLastApplyTime().equals(other.getLastApplyTime()));
+                && (this.getApplicantId() == null ? other.getApplicantId() == null : this.getApplicantId().equals(other.getApplicantId()))
+                && (this.getAcceptorId() == null ? other.getAcceptorId() == null : this.getAcceptorId().equals(other.getAcceptorId()))
+                && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
+                && (this.getContactId() == null ? other.getContactId() == null : this.getContactId().equals(other.getContactId()))
+                && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+                && (this.getApplyInfo() == null ? other.getApplyInfo() == null : this.getApplyInfo().equals(other.getApplyInfo()))
+                && (this.getLastApplyTime() == null ? other.getLastApplyTime() == null : this.getLastApplyTime().equals(other.getLastApplyTime()));
     }
 
     @Override
