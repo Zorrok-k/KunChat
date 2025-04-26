@@ -16,5 +16,5 @@ public interface UserContactInfoService extends IService<UserContactInfo> {
 
     UserContactInfo updateStatus(String userId, String contactId, int status);
 
-    List<String> getUserContactInfo(String userId);
+    List<String> getUserContactInfo(String userId, int type);
 }

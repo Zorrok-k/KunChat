@@ -55,12 +55,20 @@ public class UserContactInfoServiceImpl extends ServiceImpl<UserContactInfoMappe
     }
 
     @Override
-    public List<String> getUserContactInfo(String userId) {
+    public List<String> getUserContactInfo(String userId, int type) {
         List<String> userContactInfoListId = new ArrayList<>();
-        List<UserContactInfo> userContactInfoList = userContactInfoMapper.selectList(new QueryWrapper<UserContactInfo>()
-                .eq("user_id", userId));
-        for (UserContactInfo userContactInfo : userContactInfoList) {
-            userContactInfoListId.add(userContactInfo.getContactId());
+        if (type == 0) {
+            List<UserContactInfo> userContactInfoList = userContactInfoMapper.selectList(new QueryWrapper<UserContactInfo>()
+                    .eq("user_id", userId).eq("type", 0));
+            for (UserContactInfo userContactInfo : userContactInfoList) {
+                userContactInfoListId.add(userContactInfo.getContactId());
+            }
+        } else {
+            List<UserContactInfo> userContactInfoList = userContactInfoMapper.selectList(new QueryWrapper<UserContactInfo>()
+                    .eq("user_id", userId).eq("type", 1));
+            for (UserContactInfo userContactInfo : userContactInfoList) {
+                userContactInfoListId.add(userContactInfo.getContactId());
+            }
         }
         return userContactInfoListId;
     }
