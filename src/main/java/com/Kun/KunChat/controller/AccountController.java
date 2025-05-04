@@ -189,7 +189,7 @@ public class AccountController extends BaseController {
         }
     }
 
-    @RequestMapping("/serach")
+    @RequestMapping("/search")
     public ResponseGlobal<Object> serach(@RequestParam(required = false) String userId,
                                          @RequestParam(required = false) String nickName,
                                          @RequestParam(required = false, defaultValue = "1") Integer page) {

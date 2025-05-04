@@ -77,7 +77,7 @@ public class GroupController extends BaseController {
     }
 
 
-    @RequestMapping("/serach")
+    @RequestMapping("/search")
     public ResponseGlobal<Object> serach(@RequestParam(required = false) String groupId,
                                          @RequestParam(required = false) String groupName,
                                          @RequestParam(required = false, defaultValue = "1") Integer page) {
