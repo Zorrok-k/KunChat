@@ -1,16 +1,20 @@
 package com.Kun.KunChat.netty;
 
+import com.Kun.KunChat.common.ApplicationContextProvider;
 import com.Kun.KunChat.common.TokenUtils;
 import com.Kun.KunChat.config.NettyConfig;
+import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.service.RedisService;
+import com.Kun.KunChat.service.UserInfoService;
+import com.alibaba.fastjson2.JSON;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
@@ -22,19 +26,15 @@ import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
  * Description: 继承 Channel 处理器并实现 channelRead 作为连接认证
  **/
 @ChannelHandler.Sharable
-@Component
 @Slf4j
-
-public class authenticationHandler extends ChannelInboundHandlerAdapter {
-
-    @Autowired
-    private TokenUtils tokenUtils;
-
-    @Autowired
-    private RedisService redisService;
+@Component
+public class AuthenticationHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        TokenUtils tokenUtils = ApplicationContextProvider.getBean(TokenUtils.class);
+        RedisService redisService = ApplicationContextProvider.getBean(RedisService.class);
+        UserInfoService userInfoService = ApplicationContextProvider.getBean(UserInfoService.class);
         if (msg instanceof FullHttpRequest request) {
             // 获取请求头
             HttpHeaders headers = request.headers();
@@ -52,6 +52,9 @@ public class authenticationHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().attr(AttributeKey.valueOf("userId")).setIfAbsent(userId);
             // 存进map
             NettyConfig.getUserChannelMap().put(userId, ctx.channel());
+            // 给客户端返回用户信息
+            UserInfo userInfo = userInfoService.getUser(userId);
+            ctx.channel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(userInfo)));
             // 关闭这handler 这个客户端不会再走这个方法了
             ctx.pipeline().remove(this);
         } else {
