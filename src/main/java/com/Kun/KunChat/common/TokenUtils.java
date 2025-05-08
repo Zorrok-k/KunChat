@@ -1,14 +1,12 @@
 package com.Kun.KunChat.common;
 
-import com.Kun.KunChat.service.RedisService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
-import java.util.UUID;
 
 
 /**
@@ -22,10 +20,15 @@ import java.util.UUID;
 @Component
 public class TokenUtils {
 
-    @Autowired
-    private RedisService redisService;
+    private static SecretKeySpec TOKEN_KEY;
 
-    private static final SecretKeySpec TOKEN_KEY = new SecretKeySpec("79EE9CF52F91D492ACB89FB6F40E0981".getBytes(), SignatureAlgorithm.HS256.getJcaName());
+    TokenUtils() {
+    }
+
+    @Value("${token.secret}")
+    public void init(String secret) {
+        TOKEN_KEY = new SecretKeySpec(secret.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+    }
 
     public String createToken(String userId) {
         return Jwts.builder()
