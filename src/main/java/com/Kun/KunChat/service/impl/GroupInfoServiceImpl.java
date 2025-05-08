@@ -2,7 +2,9 @@ package com.Kun.KunChat.service.impl;
 
 import com.Kun.KunChat.common.CustomizeUtils;
 import com.Kun.KunChat.entity.GroupInfo;
+import com.Kun.KunChat.entity.UserContactInfo;
 import com.Kun.KunChat.mapper.GroupInfoMapper;
+import com.Kun.KunChat.mapper.UserContactInfoMapper;
 import com.Kun.KunChat.service.GroupInfoService;
 import com.Kun.KunChat.service.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Kun
@@ -31,6 +35,9 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private UserContactInfoMapper userContactInfoMapper;
 
     @Override
     public GroupInfo createGroup(String userId, String groupName, int joinType) {
@@ -64,6 +71,18 @@ public class GroupInfoServiceImpl extends ServiceImpl<GroupInfoMapper, GroupInfo
         Page<GroupInfo> thePage = new Page<>(page, 10, true);
         groupInfoMapper.selectPage(thePage, new QueryWrapper<GroupInfo>().like("group_name", groupName).eq("status", 1));
         return thePage;
+    }
+
+    @Override
+    public List<String> getGroupMembers(String groupId) {
+        List<UserContactInfo> userContactInfoList = userContactInfoMapper.selectList(new QueryWrapper<UserContactInfo>()
+                .eq("contact_id", groupId).eq("type", 1)
+                .eq("status", 1));
+        List<String> userIdList = new ArrayList<>();
+        for (UserContactInfo info : userContactInfoList) {
+            userIdList.add(info.getUserId());
+        }
+        return userIdList;
     }
 
     @Override
