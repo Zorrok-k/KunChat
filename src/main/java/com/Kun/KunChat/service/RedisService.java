@@ -1,6 +1,5 @@
 package com.Kun.KunChat.service;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,27 +12,27 @@ import java.util.Map;
 
 public interface RedisService {
 
-    public void setValue(String key, Object value, long time);
+    void setValue(String key, Object value, long time);
 
-    public void setValue(String key, Object value);
+    void setValue(String key, Object value);
 
-    public Object getValue(String key);
+    <T> T getValue(String key);
 
-    public long getValueTTL(String key);
+    long getValueTTL(String key);
 
-    public void delete(String key);
+    void delete(String key);
 
-    public void putHash(String key, Map<String, Object> value);
+    void putHash(String key, Map<String, Object> value);
 
-    public Map<String, Object> getHash(String key);
+    Map<String, Object> getHash(String key);
 
-    public Object getHashField(String key, String field);
+    Object getHashField(String key, String field);
 
-    public void deleteHashField(String key, String field);
+    void deleteHashField(String key, String field);
 
-    public void deleteHash(String key);
+    void deleteHash(String key);
 
-    public boolean hasKey(String key);
+    boolean hasKey(String key);
 
 
     // public List<String> getAllHashKeys(String pattern);

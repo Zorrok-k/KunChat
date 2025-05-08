@@ -2,6 +2,7 @@ package com.Kun.KunChat.StaticVariable;
 
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.stereotype.Component;
 
 /**
  * Author: Beta
@@ -11,19 +12,20 @@ import lombok.ToString;
 
 @ToString
 @Getter
-public enum RedisKeys {
+@Component
+public class RedisKeys {
 
-    CODESIGN("CodeSign::"),
-    LOGINID("LoginId::");
+    // 注册验证码的唯一标识
+    public static final String CODESIGN = "CodeSign::";
 
-    private String key;
+    // 登录成功后登录信息在redis中的唯一标识
+    public static final String LOGINID = "LoginId::";
 
+    // 用户未读消息的标识
+    public static final String UNREAD = "OfflineMessage::";
+
+    // 私有化构造函数
     RedisKeys() {
-    }
-
-
-    RedisKeys(String key) {
-        this.key = key;
     }
 
 }

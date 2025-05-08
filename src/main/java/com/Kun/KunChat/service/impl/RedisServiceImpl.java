@@ -6,7 +6,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -40,13 +39,13 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public Object getValue(String key) {
-        return redisTemplate.opsForValue().get(key);
+    public <T> T getValue(String key) {
+        return (T) redisTemplate.opsForValue().get(key);
     }
 
     @Override
     public long getValueTTL(String key) {
-        return redisTemplate.getExpire(key,TimeUnit.SECONDS);
+        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     @Override
