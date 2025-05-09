@@ -1,6 +1,8 @@
 package com.Kun.KunChat.controller;
 
 import com.Kun.KunChat.common.BaseController;
+import com.Kun.KunChat.service.UserChatInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,11 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
  * Description: 预留站内信消息控制类
  **/
 
-@RestController("messageController")
+@RestController("chatController")
 @Validated
-@RequestMapping("/message")
-public class MessageController extends BaseController {
+@RequestMapping("/chat")
+public class ChatController extends BaseController {
 
+    @Autowired
+    private UserChatInfoService userChatInfoService;
 
 
 }

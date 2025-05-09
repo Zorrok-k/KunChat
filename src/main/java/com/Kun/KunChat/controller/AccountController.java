@@ -1,6 +1,5 @@
 package com.Kun.KunChat.controller;
 
-import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.*;
@@ -21,6 +20,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.Kun.KunChat.StaticVariable.RedisKeys.CODESIGN;
+import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
 
 /**
  * Author: Beta
@@ -57,7 +59,7 @@ public class AccountController extends BaseController {
         // 设置当前验证码唯一标识
         String codeSign = UUID.randomUUID().toString();
         // 验证码存入Redis
-        redisService.setValue(RedisKeys.CODESIGN.getKey() + codeSign, code, 60 * 5);
+        redisService.setValue(CODESIGN + codeSign, code, 60 * 5);
         // 存入容器
         Map<String, String> data = new HashMap<>();
         data.put("codeSign", codeSign);
@@ -82,8 +84,8 @@ public class AccountController extends BaseController {
     public ResponseGlobal<Object> userRegister(@NotEmpty String nikeName, @NotEmpty @Email String email, @NotEmpty String password, @NotEmpty String code, @NotEmpty String codeSign) {
         // 这样写验证码尝试机会只有一次，不过重新获取一个也很快
         try {
-            if (redisService.hasKey(RedisKeys.CODESIGN.getKey() + codeSign)) {
-                if (!code.equalsIgnoreCase(redisService.getValue(RedisKeys.CODESIGN.getKey() + codeSign).toString())) {
+            if (redisService.hasKey(CODESIGN + codeSign)) {
+                if (!code.equalsIgnoreCase(redisService.getValue(CODESIGN + codeSign).toString())) {
                     throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
                 }
                 if (userInfoService.checkEmail(email) != null) {
@@ -99,7 +101,7 @@ public class AccountController extends BaseController {
             }
 
         } finally {
-            redisService.delete(RedisKeys.CODESIGN.getKey() + codeSign);
+            redisService.delete(CODESIGN + codeSign);
         }
     }
 
@@ -117,7 +119,7 @@ public class AccountController extends BaseController {
             String loginId = customizeUtils.getUUID();
             // 用这个ID加密成Token，传回来解密才能找到是否登录
             String token = tokenUtils.createToken(loginId);
-            redisService.setValue(RedisKeys.LOGINID.getKey() + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
+            redisService.setValue(LOGINID + loginId, userInfo.getUserId(), 60 * 60 * 24 * 7);
             /**
              * 有点骑虎难下的感觉。本来这个token解密之后才能拿到登录信息，现在又非要公开一个key去拿登录信息的key，等于解密是一个摆设
              *
@@ -205,5 +207,14 @@ public class AccountController extends BaseController {
             }
         } finally {
         }
+    }
+
+    // 打个补丁……居然忘了传id，前端干啥啥不方便
+    @GlobalInterceptor
+    @RequestMapping("/getInfo")
+    public ResponseGlobal<Object> getUserId() {
+        String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
+        assert result != null;
+        return getSuccessResponse(userInfoService.getUser(result[1]));
     }
 }

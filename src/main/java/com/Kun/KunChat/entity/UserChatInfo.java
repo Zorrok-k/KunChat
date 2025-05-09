@@ -36,7 +36,7 @@ public class UserChatInfo {
     private String senderId;
 
     /**
-     * 接收方ID
+     * 接收方ID 用户或群
      */
     @TableField(value = "receiver_id")
     @NotEmpty(groups = {sendGroup.class, replyGroup.class})

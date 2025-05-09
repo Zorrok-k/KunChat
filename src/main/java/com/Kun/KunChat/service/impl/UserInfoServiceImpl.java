@@ -1,6 +1,5 @@
 package com.Kun.KunChat.service.impl;
 
-import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.common.CustomizeUtils;
 import com.Kun.KunChat.entity.UserInfo;
 import com.Kun.KunChat.mapper.UserInfoMapper;
@@ -17,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
 
 /**
  * @author Kun
@@ -114,7 +115,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public void loginOut(String loginId, String userId) {
         // 注意，这里删的应该是登录凭证而非用户信息的缓存
-        redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
+        redisService.delete(LOGINID + loginId);
         UserInfo user = new UserInfo();
         user.setUserId(userId);
         // 生成当前时间
@@ -133,6 +134,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
         userInfoMapper.updateById(user);
         user = userInfoMapper.selectById(user.getUserId());
+        user.setPassword("******");
         // 同时更新缓存数据，如果有
         if (redisService.hasKey("UserInfo::" + user.getUserId())) {
             redisService.setValue("UserInfo::" + user.getUserId(), user, redisService.getValueTTL("UserInfo::" + user.getUserId()));

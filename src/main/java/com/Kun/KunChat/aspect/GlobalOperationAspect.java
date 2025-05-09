@@ -1,6 +1,5 @@
 package com.Kun.KunChat.aspect;
 
-import com.Kun.KunChat.StaticVariable.RedisKeys;
 import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.BusinessException;
@@ -22,6 +21,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
+
+import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
 
 /**
  * Author: Beta
@@ -73,10 +74,10 @@ public class GlobalOperationAspect {
         }
         // 解密token获取登录凭证和用户id
         String loginId = tokenUtils.parseToken(token);
-        if (!redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
+        if (!redisService.hasKey(LOGINID + loginId)) {
             throw new BusinessException(Status.ERROR_LOGINLOSE);
         }
-        String userId = redisService.getValue(RedisKeys.LOGINID.getKey() + loginId).toString();
+        String userId = redisService.getValue(LOGINID + loginId).toString();
         // 给被拦截方法传递数据 result[0] = loginId; result[1] = userId
         Objects.requireNonNull(RequestContextHolder.getRequestAttributes()).setAttribute("result", new String[]{loginId, userId}, RequestAttributes.SCOPE_REQUEST);
         if (admin && !userId.equals("Admin")) {
@@ -88,8 +89,8 @@ public class GlobalOperationAspect {
         // 强制退出
         if (redisService.hasKey("CheckLoginOut::" + request.getParameter("email"))) {
             String loginId = redisService.getValue("CheckLoginOut::" + request.getParameter("email")).toString();
-            if (redisService.hasKey(RedisKeys.LOGINID.getKey() + loginId)) {
-                redisService.delete(RedisKeys.LOGINID.getKey() + loginId);
+            if (redisService.hasKey(LOGINID + loginId)) {
+                redisService.delete(LOGINID + loginId);
             }
         }
     }

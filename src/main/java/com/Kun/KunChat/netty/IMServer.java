@@ -71,7 +71,7 @@ public class IMServer {
                                 // 对http消息做聚合操作，会产生FullHttpRequest、FullHttpResponse
                                 .addLast(new HttpObjectAggregator(1024 * 64))
                                 // 用来鉴权的业务
-                                .addLast(new authenticationHandler())
+                                .addLast(new AuthenticationHandler())
                                 .addLast(new WebSocketServerProtocolHandler("/"))
                                 .addLast(new WebSocketServerHandler());
 
