@@ -1,5 +1,6 @@
 package com.Kun.KunChat.netty;
 
+import com.Kun.KunChat.common.ApplicationContextProvider;
 import com.Kun.KunChat.config.NettyConfig;
 import com.Kun.KunChat.entity.UserChatInfo;
 import com.Kun.KunChat.service.GroupInfoService;
@@ -10,8 +11,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,28 +32,29 @@ import static com.Kun.KunChat.StaticVariable.RedisKeys.UNREAD;
 @Component
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
-    @Autowired
-    private UserChatInfoService userChatInfoService;
-
-    @Autowired
-    private GroupInfoService groupInfoService;
-
-    @Autowired
-    private RedisService redisService;
-
     // 客户端连接建立时触发
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         log.info("[服务器] 有客户端连接：{}，ip：{}", ctx.channel().id().asLongText(), ctx.channel().remoteAddress());
-        // 添加到channelGroup 通道组
-        NettyConfig.getChannelGroup().add(ctx.channel());
+
     }
 
     @Transactional
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+        RedisService redisService = ApplicationContextProvider.getBean(RedisService.class);
+        GroupInfoService groupInfoService = ApplicationContextProvider.getBean(GroupInfoService.class);
+        UserChatInfoService userChatInfoService = ApplicationContextProvider.getBean(UserChatInfoService.class);
         if (msg.text().isEmpty() || msg.text() == null) {
             ctx.channel().writeAndFlush(new TextWebSocketFrame("消息不合法"));
+            return;
+        }
+        if (!NettyConfig.getChannelGroup().contains(ctx.channel())) {
+            ctx.channel().writeAndFlush(new TextWebSocketFrame("此连接未通过验证，驳回消息"));
+            return;
+        }
+        if (msg.text().equalsIgnoreCase("heart beat")) {
+            log.info("[服务器] 客户端心跳：{}", ctx.channel().attr(AttributeKey.valueOf("userId")).get());
             return;
         }
         UserChatInfo userChatInfo = JSON.parseObject(msg.text(), UserChatInfo.class);
@@ -63,54 +65,56 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
             return;
         }
         log.info("[服务器] 已将消息持久化：{}", userChatInfo);
-        // 给目标发消息
-        Channel receiverCh = NettyConfig.getUserChannelMap().get(userChatInfo.getReceiverId());
-        // 先判断是不是群组消息 是群组要遍历然后再看每个人在不在线
-        if (userChatInfo.getChatType() == 1) {
-            // 拿到该群组成员列表
-            List<String> groupMembers = groupInfoService.getGroupMembers(userChatInfo.getReceiverId());
-            for (String groupMember : groupMembers) {
-                // 如果在线 直接发
-                if (NettyConfig.getUserChannelMap().containsKey(groupMember)) {
-                    NettyConfig.getUserChannelMap().get(groupMember).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(userChatInfo)));
-                    log.info("[服务器] 给群组成员：{} 发送消息", groupMember);
-                } else {
-                    // 离线 给他创建一个未读消息的对象数组，这个是群组的未读消息对象数组
-                    List<UserChatInfo> unReadGroupMessage = new ArrayList<>();
-                    if (!redisService.hasKey(UNREAD + groupMember + ":" + userChatInfo.getReceiverId())) {
-                        unReadGroupMessage.add(userChatInfo);
-                    } else {
-                        unReadGroupMessage = redisService.getValue(UNREAD + groupMember + ":" + userChatInfo.getReceiverId());
-                        unReadGroupMessage.add(userChatInfo);
-                        if (unReadGroupMessage.size() > 10) {
-                            unReadGroupMessage.remove(0);
-                        }
-                    }
-                    log.info("[服务器] 添加用户：{} 群组 {} 的离线消息队列：{}", groupMember, userChatInfo.getReceiverId(), unReadGroupMessage);
-                    redisService.setValue(UNREAD + groupMember + ":" + userChatInfo.getReceiverId(), unReadGroupMessage);
-                }
-            }
+        String senderId = userChatInfo.getSenderId();
+        String receiverId = userChatInfo.getReceiverId();
+        int chatType = userChatInfo.getChatType();
+
+        // 统一接收者列表
+        List<String> receivers = new ArrayList<>();
+
+        if (chatType == 1) {
+            // 群聊：获取成员列表
+            receivers = groupInfoService.getGroupMembers(receiverId);
         } else {
-            if (NettyConfig.getUserChannelMap().containsKey(userChatInfo.getReceiverId())) {
-                // 如果在线直接发
-                NettyConfig.getUserChannelMap().get(userChatInfo.getReceiverId()).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(userChatInfo)));
-                log.info("[服务器] 给：{} 发送消息", userChatInfo.getReceiverId());
+            // 单聊：只加一个接收者
+            receivers.add(receiverId);
+        }
+
+        // 遍历每个接收者
+        for (String memberId : receivers) {
+            if (memberId.equalsIgnoreCase(senderId)) {
+                continue;// 排除自己
+            }
+
+            Channel channel = NettyConfig.getUserChannelMap().get(memberId);
+
+            String chatKey;
+            if (chatType == 1) {
+                chatKey = UNREAD + memberId + ":" + receiverId; // 群聊 key
             } else {
-                // 给他创建一个未读消息的对象数组
-                List<UserChatInfo> unReadUserMessage = new ArrayList<>();
-                if (!redisService.hasKey(UNREAD + userChatInfo.getReceiverId() + ":" + userChatInfo.getSenderId())) {
-                    unReadUserMessage.add(userChatInfo);
-                } else {
-                    unReadUserMessage = redisService.getValue(UNREAD + userChatInfo.getReceiverId() + ":" + userChatInfo.getSenderId());
-                    unReadUserMessage.add(userChatInfo);
-                    if (unReadUserMessage.size() > 10) {
-                        unReadUserMessage.remove(0);
-                    }
+                chatKey = UNREAD + memberId + ":" + senderId;   // 单聊 key
+            }
+
+            if (channel != null && channel.isActive()) {
+                // 在线：直接发送
+                channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(userChatInfo)));
+                log.info("[服务器] 给用户 {} 发送消息", memberId);
+            } else {
+                // 不在线：添加离线消息
+                List<UserChatInfo> unReadMessages = new ArrayList<>();
+                if (redisService.hasKey(chatKey)) {
+                    unReadMessages = redisService.getValue(chatKey);
                 }
-                log.info("[服务器] 添加用户：{} 与 用户：{}的离线消息队列：{}", userChatInfo.getReceiverId(), userChatInfo.getSenderId(), unReadUserMessage);
-                redisService.setValue(UNREAD + userChatInfo.getReceiverId() + ":" + userChatInfo.getSenderId(), unReadUserMessage);
+                unReadMessages.add(userChatInfo);
+                if (unReadMessages.size() > 10) {
+                    unReadMessages.remove(0);
+                }
+                redisService.setValue(chatKey, unReadMessages);
+                log.info("[服务器] 添加用户 {} 的离线消息队列: {}", memberId, unReadMessages);
             }
         }
+        // 给发送者回报消息发送成功 能走到这肯定不失败，因为我加了事务 👍
+        ctx.channel().writeAndFlush(new TextWebSocketFrame("success"));
     }
 
     @Override
