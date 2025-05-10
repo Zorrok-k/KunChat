@@ -1,6 +1,5 @@
 package com.Kun.KunChat.controller;
 
-import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.*;
 import com.Kun.KunChat.entity.UserInfo;
@@ -23,6 +22,7 @@ import java.util.UUID;
 
 import static com.Kun.KunChat.StaticVariable.RedisKeys.CODESIGN;
 import static com.Kun.KunChat.StaticVariable.RedisKeys.LOGINID;
+import static com.Kun.KunChat.StaticVariable.Status.*;
 
 /**
  * Author: Beta
@@ -72,7 +72,7 @@ public class AccountController extends BaseController {
     public ResponseGlobal<Object> checkEmail(@NotEmpty @Email String email) {
         try {
             if (userInfoService.checkEmail(email) != null) {
-                throw new BusinessException(Status.ERROR_EMAILEXITS);
+                throw new BusinessException(ERROR_EMAILEXITS);
             }
         } finally {
 
@@ -86,18 +86,18 @@ public class AccountController extends BaseController {
         try {
             if (redisService.hasKey(CODESIGN + codeSign)) {
                 if (!code.equalsIgnoreCase(redisService.getValue(CODESIGN + codeSign).toString())) {
-                    throw new BusinessException(Status.ERROR_CHECKCODEWRONG);
+                    throw new BusinessException(ERROR_CHECKCODEWRONG);
                 }
                 if (userInfoService.checkEmail(email) != null) {
-                    throw new BusinessException(Status.ERROR_EMAILEXITS);
+                    throw new BusinessException(ERROR_EMAILEXITS);
                 }
                 UserInfo user = userInfoService.addUser(nikeName, email, password);
                 if (user == null) {
-                    throw new BusinessException(Status.FAILED);
+                    throw new BusinessException(FAILED);
                 }
                 return getSuccessResponse(user);
             } else {
-                throw new BusinessException(Status.ERROR_CHECKCODELOSE);
+                throw new BusinessException(ERROR_CHECKCODELOSE);
             }
 
         } finally {
@@ -113,7 +113,7 @@ public class AccountController extends BaseController {
             UserInfo userInfo = userInfoService.login(email, password);
             // 如果为空 说明账号或密码错误 抛出异常
             if (userInfo == null) {
-                throw new BusinessException(Status.ERROR_LOGIN);
+                throw new BusinessException(ERROR_LOGIN);
             }
             // 生成在Redis中的唯一登录ID
             String loginId = customizeUtils.getUUID();
@@ -144,7 +144,7 @@ public class AccountController extends BaseController {
             userForm.setUserId(result[1]);
             // 查询邮箱是否重复
             if (userInfoService.checkEmail(userForm.getEmail()) != null) {
-                throw new BusinessException(Status.ERROR_EMAILEXITS);
+                throw new BusinessException(ERROR_EMAILEXITS);
             }
             // 这里不抛异常是因为开启了事务，失败回滚，能跑到这里一定是成功的，报错再说，我没考虑
             return getSuccessResponse(userInfoService.updateUser(userForm));
@@ -199,7 +199,7 @@ public class AccountController extends BaseController {
             if (!userId.isEmpty()) {
                 UserInfo userInfo = userInfoService.getUser(userId);
                 if (userInfo == null) {
-                    throw new BusinessException(Status.ERROR_SERACH);
+                    throw new BusinessException(ERROR_SERACH);
                 }
                 return getSuccessResponse(userInfo);
             } else {
@@ -209,12 +209,9 @@ public class AccountController extends BaseController {
         }
     }
 
-    // 打个补丁……居然忘了传id，前端干啥啥不方便
-    @GlobalInterceptor
+
     @RequestMapping("/getInfo")
-    public ResponseGlobal<Object> getUserId() {
-        String[] result = (String[]) RequestContextHolder.currentRequestAttributes().getAttribute("result", RequestAttributes.SCOPE_REQUEST);
-        assert result != null;
-        return getSuccessResponse(userInfoService.getUser(result[1]));
+    public ResponseGlobal<Object> getUserId(@RequestParam @NotEmpty String userId) {
+        return getSuccessResponse(userInfoService.getUser(userId));
     }
 }

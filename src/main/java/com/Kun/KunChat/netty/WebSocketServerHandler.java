@@ -35,8 +35,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
     // 客户端连接建立时触发
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.info("[服务器] 有客户端连接：{}，ip：{}", ctx.channel().id().asLongText(), ctx.channel().remoteAddress());
-
+        // log.info("[服务器] 有客户端连接：{}，ip：{}", ctx.channel().id().asLongText(), ctx.channel().remoteAddress());
+        log.info("[服务器] 有客户端连接，ip：{}", ctx.channel().remoteAddress());
     }
 
     @Transactional
@@ -113,14 +113,25 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
                 log.info("[服务器] 添加用户 {} 的离线消息队列: {}", memberId, unReadMessages);
             }
         }
-        // 给发送者回报消息发送成功 能走到这肯定不失败，因为我加了事务 👍
-        ctx.channel().writeAndFlush(new TextWebSocketFrame("success"));
+        // 给发送者回报这条消息发送成功，并且能将这条消息写入本地数据库 能走到这肯定不失败，因为我加了事务 👍
+        ctx.channel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(userChatInfo)));
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        log.error("[服务器] WebSocketServerHandler异常: {}", ctx.channel(), cause);
-        ctx.channel().close();
+        if (cause instanceof java.net.SocketException && "Connection reset".equals(cause.getMessage())) {
+            // 客户端强制断开连接
+            log.error("[服务器] 客户端断开连接（Connection reset）: {}", ctx.channel().remoteAddress());
+        } else {
+            // 打印其他异常信息
+            log.error("[服务器] 发生异常：{}", cause.getMessage());
+        }
+
+        // 关闭通道，释放资源
+        ctx.close();
+
+        // 从连接管理器中移除该 Channel
+        NettyConfig.getChannelGroup().remove(ctx.channel());
     }
 }
 

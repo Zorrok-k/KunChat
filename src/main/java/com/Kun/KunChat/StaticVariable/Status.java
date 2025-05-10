@@ -38,6 +38,7 @@ public enum Status {
     ERROR_ADMIN(1614, "你并非管理员！"),
     ERROR_BLACK(1620, "已被拉黑！"),
     ERROR_CONTACTREPEAT(1621,"关系重复请求！"),
+    INFO_UNREADEMPTY(1700,"没有未读消息！"),
     ERROR_BUSINESS(1500, "业务异常！"),
     FAILED(2000, "服务器异常！请稍后尝试。");
 

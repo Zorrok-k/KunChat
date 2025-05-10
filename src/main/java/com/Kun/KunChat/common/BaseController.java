@@ -30,6 +30,14 @@ public class BaseController {
         return responseGlobal;
     }
 
+    // 无数据返回成功
+    protected <T> ResponseGlobal<Object> getSuccessResponse(Status status) {
+        responseGlobal.setCode(status.getCode());
+        responseGlobal.setMsg(status.getMessage());
+        responseGlobal.setData(null);
+        return responseGlobal;
+    }
+
     // 带数据返回成功
     protected <T> ResponseGlobal<Object> getSuccessResponse(Object data) {
         responseGlobal.setCode(Status.SUCCEED.getCode());

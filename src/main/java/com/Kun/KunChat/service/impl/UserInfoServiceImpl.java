@@ -104,6 +104,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfoMapper.updateById(user);
         // 更新上线时间
         user = userInfoMapper.selectById(user.getUserId());
+        user.setPassword("******");
         // 同时更新缓存数据，如果有
         if (redisService.hasKey("UserInfo::" + user.getUserId())) {
             redisService.setValue("UserInfo::" + user.getUserId(), user, redisService.getValueTTL("UserInfo::" + user.getUserId()));

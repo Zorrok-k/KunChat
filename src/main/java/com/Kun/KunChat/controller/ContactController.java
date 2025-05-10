@@ -1,6 +1,5 @@
 package com.Kun.KunChat.controller;
 
-import com.Kun.KunChat.StaticVariable.Status;
 import com.Kun.KunChat.annotation.GlobalInterceptor;
 import com.Kun.KunChat.common.BaseController;
 import com.Kun.KunChat.common.BusinessException;
@@ -29,6 +28,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.Kun.KunChat.StaticVariable.Status.*;
 
 /**
  * Author: Beta
@@ -112,11 +113,11 @@ public class ContactController extends BaseController {
                 // 消息存存在 则查看状态码
                 // 被拉黑抛出异常，不做任何处理
                 if (message.getStatus() == 3) {
-                    throw new BusinessException(Status.ERROR_BLACK);
+                    throw new BusinessException(ERROR_BLACK);
                 }
                 // 如果已经同意该请求，抛重复请求关系异常
                 if (message.getStatus() == 1) {
-                    throw new BusinessException(Status.ERROR_CONTACTREPEAT);
+                    throw new BusinessException(ERROR_CONTACTREPEAT);
                 }
                 // 走到这只能是被拒绝或尚未处理
                 message.setStatus(0);
@@ -173,7 +174,7 @@ public class ContactController extends BaseController {
             UserContactMessage message = userContactMessageService.getMessage(messageId);
             // 如果这个处理id不是目前登录的id 就抛没有权限的异常
             if (!message.getAcceptorId().equalsIgnoreCase(userId)) {
-                throw new BusinessException(Status.ERROR_ACTION);
+                throw new BusinessException(ERROR_ACTION);
             }
             // 如果同意请求
             if (status == 1) {
