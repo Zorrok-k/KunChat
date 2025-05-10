@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +52,11 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public void delete(String key) {
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public Set<String> getKeysByPrefix(String prefix) {
+        return redisTemplate.keys(prefix + "*");
     }
 
     @Override

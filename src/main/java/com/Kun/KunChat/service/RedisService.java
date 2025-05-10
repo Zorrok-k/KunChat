@@ -1,6 +1,7 @@
 package com.Kun.KunChat.service;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Author: Beta
@@ -21,6 +22,8 @@ public interface RedisService {
     long getValueTTL(String key);
 
     void delete(String key);
+
+    Set<String> getKeysByPrefix(String prefix);
 
     void putHash(String key, Map<String, Object> value);
 
